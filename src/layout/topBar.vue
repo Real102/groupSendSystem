@@ -91,7 +91,7 @@ export default {
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		background: @sideBar-title-bgcolor;
+		background: @sideBar-bgcolor;
 		cursor: pointer;
 	}
 	.nav-logo {

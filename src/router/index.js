@@ -124,6 +124,29 @@ export const asyncRoutes = [
 		]
 	},
 	{
+		path: '/sign',
+		name: 'sign',
+		component: () => import(/* webpackChunkName: "sign" */ '@/views/sign/index.vue'),
+		redirect: '/sign/login',
+		children: [
+			{
+				path: 'login',
+				component: () => import(/* webpackChunkName: "sign" */ '@/views/sign/login.vue'),
+				meta: { title: '登录' }
+			},
+			{
+				path: 'regist',
+				component: () => import(/* webpackChunkName: "sign" */ '@/views/sign/regist.vue'),
+				meta: { title: '登录' }
+			},
+			{
+				path: 'forget',
+				component: () => import(/* webpackChunkName: "sign" */ '@/views/sign/forget.vue'),
+				meta: { title: '登录' }
+			}
+		]
+	},
+	{
 		path: '/',
 		redirect: '/home/index'
 	},
