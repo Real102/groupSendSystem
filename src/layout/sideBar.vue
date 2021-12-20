@@ -1,113 +1,42 @@
 <template>
 	<div class="sideBar">
-		<div class="container">
-			<div class="item" v-for="item in resetRoutes" :key="item.path">
-				<div
-					class="item-title"
-					:class="item.active ? 'routerActive' : ''"
-					@click="handleClick(item)"
-				>
-					<i class="icon" :class="item.meta.icon"></i>
-					<span>{{ item.meta.title }}</span>
-					<i
-						class="icon icon-arrow"
-						v-show="item.children"
-						:class="item.expanded ? 'icon-arrow-active' : ''"
-					></i>
-				</div>
-				<transition-group name="fade">
-					<template v-if="item.expanded">
-						<div
-							class="subItem"
-							:class="subItem.active ? 'routerActive' : ''"
-							v-for="subItem in item.children"
-							:key="subItem.path"
-							@click="handleClick(item, subItem)"
-						>
-							<li>
-								<span>{{ subItem.meta.title }}</span>
-							</li>
-						</div>
-					</template>
-				</transition-group>
-			</div>
-		</div>
+		<item
+			v-for="item in routerData"
+			:key="item.path"
+			:routeData="item"
+			@handleExpand="handleExpand"
+		>
+			<template v-if="item.children">
+				<subItem v-for="sub in item.children" :key="sub.path" :subRouteData="sub"></subItem>
+			</template>
+		</item>
 	</div>
 </template>
-
 <script>
+import item from './item.vue'
+import subItem from './subItem.vue'
 import { asyncRoutes } from '@/router/index.js'
-
 export default {
-	name: 'sideBar',
+	name: 'SideBar',
+	components: {
+		item,
+		subItem
+	},
 	data() {
 		return {
-			resetRoutes: [
-				// {
-				// 	path: '/index',
-				// 	meta: { title: '首页', icon: 'icon-home' },
-				// 	active: true,
-				// 	expanded: false
-				// },
-				// {
-				// 	path: '/material',
-				// 	meta: { title: '料子管理', icon: 'icon-material' },
-				// 	active: false,
-				// 	expanded: false,
-				// 	children: [
-				// 		{
-				// 			path: '/send',
-				// 			meta: { title: '管理管理', icon: 'icon-send' },
-				// 			active: false
-				// 		}
-				// 	]
-				// }
-			]
+			routerData: []
 		}
-	},
-	mounted() {
-		// 初始化导航数据
-		this.resetRoutes = []
-		asyncRoutes.forEach(item => {
-			if (item.path !== '/' && item.path !== '/404' && item.path !== '*') {
-				const subChildren = []
-				if (item.children.length > 1) {
-					item.children.forEach((subItem, index) => {
-						if (subItem.meta?.showSideBar !== false && index !== 0) {
-							subItem.path = item.path + '/' + subItem.path
-							subChildren.push(subItem)
-						}
-					})
-					this.resetRoutes.push({
-						meta: item.meta || {},
-						children: subChildren,
-						active: item.path === '/home/index',
-						expanded: false
-					})
-				} else {
-					if (item.meta?.showSideBar !== false) {
-						this.resetRoutes.push({
-							path: item.path + '/' + item.children[0].path,
-							meta: item.meta || {},
-							active: item.path === '/home/index',
-							expanded: false
-						})
-					}
-				}
-			}
-		})
 	},
 	watch: {
 		$route: {
 			handler: function () {
-				// 通过路由的变化控制侧边栏的变化
 				this.$nextTick(() => {
-					this.resetRoutes.forEach(i => {
-						i.active = i?.path === this.$route.path
-						if (i.children) {
-							i.children.forEach(j => {
-								j.active = j?.path === this.$route.path
-							})
+					// 刷新页面时，如果打开了某子页面，那么自动展开该父列
+					this.routerData.forEach(item => {
+						const res = item.children?.find(sub => sub.path === this.$route.path)
+						// item.expanded = !!res
+						if (res) {
+							item.expanded = true
 						}
 					})
 				})
@@ -116,98 +45,58 @@ export default {
 			deep: true
 		}
 	},
-	methods: {
-		handleClick(item, subItem) {
-			if (!subItem) {
-				item.expanded = !item.expanded
-				this.$router.push(item.path)
-			} else {
-				this.$router.push(subItem.path)
+	mounted() {
+		this.routerData = []
+		asyncRoutes.forEach(rt => {
+			// 处理路由格式，区分只有一个子页面和多个子页面的情况
+			// 统一数据格式，便于遍历
+			if (!['/404', '*'].includes(rt.path)) {
+				if (!rt.meta?.hideSideBar) {
+					if (rt.children?.length > 1) {
+						this.routerData.push({
+							path: rt.path,
+							meta: rt.meta || {},
+							expanded: false,
+							children: rt.children
+						})
+					} else if (rt.children?.length === 1) {
+						const sub = rt.children[0]
+						this.routerData.push({
+							path: sub.path,
+							meta: Object.assign(rt.meta, sub.meta)
+						})
+					}
+				}
 			}
+		})
+	},
+	methods: {
+		handleExpand(path) {
+			this.routerData.forEach(i => {
+				if (i.path === path) {
+					i.expanded = !i.expanded
+				}
+			})
 		}
 	}
 }
 </script>
-
 <style lang="less" scoped>
 .sideBar {
-	position: absolute;
 	width: 100%;
-	height: 100%;
-	background: @sideBar-bgcolor;
-	background-position: bottom;
-	background-size: 100% auto;
-	overflow: hidden;
+	background-color: #1f1f1f;
 	padding-top: @topBar-h;
-	.container {
+	box-sizing: border-box;
+	.activeItemClass,
+	.activeSubItemClass {
+		display: block;
 		width: 100%;
-		height: 100%;
+		height: 50px;
 		overflow: hidden;
-		overflow-y: auto;
-		.item {
-			width: 100%;
-			.item-title {
-				width: 100%;
-				height: @sideBar-item-h;
-				color: @sideBar-fontColor;
-				display: flex;
-				justify-content: flex-start;
-				align-items: center;
-				position: relative;
-				cursor: pointer;
-				box-sizing: border-box;
-				border-left: 6px solid transparent;
-				i {
-					margin-left: 26px;
-				}
-				i:last-of-type {
-					margin-left: 0;
-					position: absolute;
-					right: 20px;
-				}
-				.icon-arrow-active {
-					transform: rotate(90deg);
-				}
-				span {
-					margin-left: 10px;
-					color: @sideBar-fontColor;
-					font-size: 14px;
-					display: block;
-					overflow: hidden;
-					text-overflow: ellipsis;
-				}
-			}
-			.subItem {
-				width: 100%;
-				box-sizing: border-box;
-				border-left: 6px solid transparent;
-				li {
-					display: block;
-					height: @sideBar-item-h;
-					line-height: @sideBar-item-h;
-					list-style: disc;
-					text-align: left;
-					font-size: 14px;
-					cursor: pointer;
-					span {
-						color: #fff;
-						margin-left: 52px;
-					}
-				}
-			}
-			.routerActive {
-				border-left: 6px solid #003ecb;
-				background: @sideBar-title-bgcolor;
-			}
-		}
+		background-color: rgb(84, 92, 100);
 	}
-	.fade-enter-active,
-	.fade-leave-active {
-		transition: opacity 0.5s;
-	}
-	.fade-enter,
-	.fade-leave {
-		opacity: 0;
+	.activeSubItemClass {
+		height: 40px;
 	}
 }
 </style>

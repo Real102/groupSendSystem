@@ -12,7 +12,7 @@ export const asyncRoutes = [
 		meta: { title: '首页', icon: 'icon-home' },
 		children: [
 			{
-				path: 'index',
+				path: '/home/index',
 				component: () => import(/* webpackChunkName: "home" */ '@/views/home/index.vue'),
 				meta: { title: '首页' }
 			}
@@ -23,11 +23,11 @@ export const asyncRoutes = [
 		path: '/material',
 		name: 'material',
 		component: Layout,
-		meta: { title: '料子管理', icon: 'icon-material' },
+		meta: { icon: 'icon-material' },
 		redirect: '/material/index',
 		children: [
 			{
-				path: 'index',
+				path: '/material/index',
 				component: () =>
 					import(/* webpackChunkName: "material" */ '@/views/material/index.vue'),
 				meta: { title: '料子管理' }
@@ -38,11 +38,11 @@ export const asyncRoutes = [
 		path: '/send',
 		name: 'send',
 		component: Layout,
-		meta: { title: '群发管理', icon: 'icon-send' },
+		meta: { icon: 'icon-send' },
 		redirect: '/send/index',
 		children: [
 			{
-				path: 'index',
+				path: '/send/index',
 				component: () => import(/* webpackChunkName: "send" */ '@/views/send/index.vue'),
 				meta: { title: '群发管理' }
 			}
@@ -53,11 +53,11 @@ export const asyncRoutes = [
 		path: '/custom',
 		name: 'custom',
 		component: Layout,
-		meta: { title: '用户管理', icon: 'icon-user-manage' },
+		meta: { icon: 'icon-user-manage' },
 		redirect: '/custom/index',
 		children: [
 			{
-				path: 'index',
+				path: '/custom/index',
 				component: () =>
 					import(/* webpackChunkName: "custom" */ '@/views/custom/index.vue'),
 				meta: { title: '用户管理' }
@@ -68,11 +68,11 @@ export const asyncRoutes = [
 		path: '/country',
 		name: 'country',
 		component: Layout,
-		meta: { title: '群发国家管理', icon: 'icon-country' },
+		meta: { icon: 'icon-country' },
 		redirect: '/country/index',
 		children: [
 			{
-				path: 'index',
+				path: '/country/index',
 				component: () =>
 					import(/* webpackChunkName: "country" */ '@/views/country/index.vue'),
 				meta: { title: '群发国家管理' }
@@ -83,11 +83,11 @@ export const asyncRoutes = [
 		path: '/task',
 		name: 'task',
 		component: Layout,
-		meta: { title: '任务管理', icon: 'icon-task' },
+		meta: { icon: 'icon-task' },
 		redirect: '/task/index',
 		children: [
 			{
-				path: 'index',
+				path: '/task/index',
 				component: () => import(/* webpackChunkName: "task" */ '@/views/task/index.vue'),
 				meta: { title: '任务管理' }
 			}
@@ -98,11 +98,11 @@ export const asyncRoutes = [
 		path: '/log',
 		name: 'log',
 		component: Layout,
-		meta: { title: '操作日志', icon: 'icon-log' },
+		meta: { icon: 'icon-log' },
 		redirect: '/log/index',
 		children: [
 			{
-				path: 'index',
+				path: '/log/index',
 				component: () => import(/* webpackChunkName: "log" */ '@/views/log/index.vue'),
 				meta: { title: '操作日志' }
 			}
@@ -112,11 +112,11 @@ export const asyncRoutes = [
 		path: '/personal',
 		name: 'personal',
 		component: Layout,
-		meta: { title: '个人中心', showSideBar: false },
+		meta: { title: '个人中心', hideSideBar: true },
 		redirect: '/personal/reset',
 		children: [
 			{
-				path: 'reset',
+				path: '/personal/reset',
 				component: () =>
 					import(/* webpackChunkName: "personal" */ '@/views/personal/reset.vue'),
 				meta: { title: '修改密码' }
@@ -124,27 +124,22 @@ export const asyncRoutes = [
 		]
 	},
 	{
-		path: '/sign',
-		name: 'sign',
-		component: () => import(/* webpackChunkName: "sign" */ '@/views/sign/index.vue'),
-		redirect: '/sign/login',
-		children: [
-			{
-				path: 'login',
-				component: () => import(/* webpackChunkName: "sign" */ '@/views/sign/login.vue'),
-				meta: { title: '登录' }
-			},
-			{
-				path: 'regist',
-				component: () => import(/* webpackChunkName: "sign" */ '@/views/sign/regist.vue'),
-				meta: { title: '登录' }
-			},
-			{
-				path: 'forget',
-				component: () => import(/* webpackChunkName: "sign" */ '@/views/sign/forget.vue'),
-				meta: { title: '登录' }
-			}
-		]
+		path: '/login',
+		name: 'login',
+		component: () => import(/* webpackChunkName: "sign" */ '@/views/sign/login.vue'),
+		meta: { title: '登录', hideSideBar: true }
+	},
+	{
+		path: '/regist',
+		name: 'regist',
+		component: () => import(/* webpackChunkName: "sign" */ '@/views/sign/regist.vue'),
+		meta: { title: '注册', hideSideBar: true }
+	},
+	{
+		path: '/forget',
+		name: 'forget',
+		component: () => import(/* webpackChunkName: "sign" */ '@/views/sign/forget.vue'),
+		meta: { title: '忘记密码', hideSideBar: true }
 	},
 	{
 		path: '/',
