@@ -4,83 +4,83 @@
  */
 import Vue from 'vue'
 import {
-	// Pagination,
-	// Dialog,
-	// Autocomplete,
-	Dropdown,
-	DropdownMenu,
-	DropdownItem,
-	// Menu,
-	// Submenu,
-	// MenuItem,
-	// MenuItemGroup,
-	// Input,
-	// InputNumber,
-	// Radio,
-	// RadioGroup,
-	// RadioButton,
-	// Checkbox,
-	// CheckboxButton,
-	// CheckboxGroup,
-	// Switch,
-	// Select,
-	// Option,
-	// OptionGroup,
-	Button,
-	// ButtonGroup,
-	// Table,
-	// TableColumn,
-	// DatePicker,
-	// TimeSelect,
-	// TimePicker,
-	// Popover,
-	// Tooltip,
-	// Breadcrumb,
-	// BreadcrumbItem,
-	// Form,
-	// FormItem,
-	// Tabs,
-	// TabPane,
-	// Tag,
-	// Tree,
-	// Alert,
-	// Slider,
-	// Icon,
-	// Row,
-	// Col,
-	// Upload,
-	// Progress,
-	// Spinner,
-	// Badge,
-	// Card,
-	// Rate,
-	// Steps,
-	// Step,
-	// Carousel,
-	// CarouselItem,
-	// Collapse,
-	// CollapseItem,
-	// Cascader,
-	// ColorPicker,
-	// Transfer,
-	// Container,
-	// Header,
-	// Aside,
-	// Main,
-	// Footer,
-	// Timeline,
-	// TimelineItem,
-	// Link,
-	// Divider,
-	// Image,
-	// Calendar,
-	// Backtop,
-	// PageHeader,
-	// CascaderPanel
-	// Loading,
-	// MessageBox,
-	Message
-	// Notification
+  // Pagination,
+  // Dialog,
+  // Autocomplete,
+  Dropdown,
+  DropdownMenu,
+  DropdownItem,
+  // Menu,
+  // Submenu,
+  // MenuItem,
+  // MenuItemGroup,
+  Input,
+  // InputNumber,
+  // Radio,
+  // RadioGroup,
+  // RadioButton,
+  // Checkbox,
+  // CheckboxButton,
+  // CheckboxGroup,
+  // Switch,
+  // Select,
+  // Option,
+  // OptionGroup,
+  Button,
+  // ButtonGroup,
+  Table,
+  TableColumn,
+  // DatePicker,
+  // TimeSelect,
+  // TimePicker,
+  // Popover,
+  // Tooltip,
+  // Breadcrumb,
+  // BreadcrumbItem,
+  Form,
+  FormItem,
+  // Tabs,
+  // TabPane,
+  // Tag,
+  // Tree,
+  // Alert,
+  // Slider,
+  // Icon,
+  // Row,
+  // Col,
+  // Upload,
+  // Progress,
+  // Spinner,
+  // Badge,
+  // Card,
+  // Rate,
+  // Steps,
+  // Step,
+  // Carousel,
+  // CarouselItem,
+  // Collapse,
+  // CollapseItem,
+  // Cascader,
+  // ColorPicker,
+  // Transfer,
+  // Container,
+  // Header,
+  // Aside,
+  // Main,
+  // Footer,
+  // Timeline,
+  // TimelineItem,
+  // Link,
+  // Divider,
+  // Image,
+  // Calendar,
+  // Backtop,
+  // PageHeader,
+  // CascaderPanel
+  // Loading,
+  // MessageBox,
+  Message
+  // Notification
 } from 'element-ui'
 import './rewrite/index.less'
 
@@ -94,7 +94,7 @@ Vue.use(DropdownItem)
 // Vue.use(Submenu)
 // Vue.use(MenuItem)
 // Vue.use(MenuItemGroup)
-// Vue.use(Input)
+Vue.use(Input)
 // Vue.use(InputNumber)
 // Vue.use(Radio)
 // Vue.use(RadioGroup)
@@ -108,8 +108,8 @@ Vue.use(DropdownItem)
 // Vue.use(OptionGroup)
 Vue.use(Button)
 // Vue.use(ButtonGroup)
-// Vue.use(Table)
-// Vue.use(TableColumn)
+Vue.use(Table)
+Vue.use(TableColumn)
 // Vue.use(DatePicker)
 // Vue.use(TimeSelect)
 // Vue.use(TimePicker)
@@ -117,8 +117,8 @@ Vue.use(Button)
 // Vue.use(Tooltip)
 // Vue.use(Breadcrumb)
 // Vue.use(BreadcrumbItem)
-// Vue.use(Form)
-// Vue.use(FormItem)
+Vue.use(Form)
+Vue.use(FormItem)
 // Vue.use(Tabs)
 // Vue.use(TabPane)
 // Vue.use(Tag)
