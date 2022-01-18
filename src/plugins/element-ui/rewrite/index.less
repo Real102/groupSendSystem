@@ -1,0 +1,51 @@
+// 表格的样式统一优化
+.el-table {
+  .el-table__header-wrapper {
+    .el-table__header {
+      thead > tr > th {
+        // thead 加两个像素的边框
+        border-bottom: 2px solid #3c8dbc;
+        .cell {
+          font-size: 14px;
+          font-weight: 600;
+          color: @main-fontcolor;
+        }
+      }
+    }
+  }
+  .el-table__cell {
+    height: 40px;
+    padding: 0;
+  }
+  th.el-table__cell.is-leaf {
+    border-bottom: none;
+  }
+}
+
+// 分页器统一样式
+.el-pagination {
+  margin-top: 25px;
+  text-align: right;
+}
+
+// 弹框统一样式
+.el-dialog {
+  .el-dialog__header {
+    padding: 20px 15px 15px 15px;
+    span {
+      font-size: 18px;
+      line-height: 18px;
+      font-weight: 600;
+    }
+    .el-dialog__headerbtn {
+      top: 18px;
+    }
+  }
+  .el-dialog__body {
+    padding: 20px;
+  }
+  .el-dialog__footer {
+    padding: 20px;
+    text-align: center;
+  }
+}

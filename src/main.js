@@ -7,6 +7,7 @@ import '@/plugins/element-ui'
 // css
 import './styles/reset.less'
 import './styles/_variables.less'
+import './styles/global.less'
 import './styles/sprite/sprite.less'
 // svg
 import '@/components/svg'
@@ -16,7 +17,7 @@ import '@/router/permission.js'
 Vue.config.productionTip = false
 
 new Vue({
-	router,
-	store,
-	render: h => h(App)
+  router,
+  store,
+  render: h => h(App)
 }).$mount('#app')

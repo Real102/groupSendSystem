@@ -4,8 +4,8 @@
  */
 import Vue from 'vue'
 import {
-  // Pagination,
-  // Dialog,
+  Pagination,
+  Dialog,
   // Autocomplete,
   Dropdown,
   DropdownMenu,
@@ -15,26 +15,26 @@ import {
   // MenuItem,
   // MenuItemGroup,
   Input,
-  // InputNumber,
-  // Radio,
-  // RadioGroup,
-  // RadioButton,
+  InputNumber,
+  Radio,
+  RadioGroup,
+  RadioButton,
   // Checkbox,
   // CheckboxButton,
   // CheckboxGroup,
   // Switch,
-  // Select,
-  // Option,
+  Select,
+  Option,
   // OptionGroup,
   Button,
   // ButtonGroup,
   Table,
   TableColumn,
-  // DatePicker,
+  DatePicker,
   // TimeSelect,
-  // TimePicker,
+  TimePicker,
   // Popover,
-  // Tooltip,
+  Tooltip,
   // Breadcrumb,
   // BreadcrumbItem,
   Form,
@@ -48,8 +48,8 @@ import {
   // Icon,
   // Row,
   // Col,
-  // Upload,
-  // Progress,
+  Upload,
+  Progress,
   // Spinner,
   // Badge,
   // Card,
@@ -84,8 +84,8 @@ import {
 } from 'element-ui'
 import './rewrite/index.less'
 
-// Vue.use(Pagination)
-// Vue.use(Dialog)
+Vue.use(Pagination)
+Vue.use(Dialog)
 // Vue.use(Autocomplete)
 Vue.use(Dropdown)
 Vue.use(DropdownMenu)
@@ -95,26 +95,26 @@ Vue.use(DropdownItem)
 // Vue.use(MenuItem)
 // Vue.use(MenuItemGroup)
 Vue.use(Input)
-// Vue.use(InputNumber)
-// Vue.use(Radio)
-// Vue.use(RadioGroup)
-// Vue.use(RadioButton)
+Vue.use(InputNumber)
+Vue.use(Radio)
+Vue.use(RadioGroup)
+Vue.use(RadioButton)
 // Vue.use(Checkbox)
 // Vue.use(CheckboxButton)
 // Vue.use(CheckboxGroup)
 // Vue.use(Switch)
-// Vue.use(Select)
-// Vue.use(Option)
+Vue.use(Select)
+Vue.use(Option)
 // Vue.use(OptionGroup)
 Vue.use(Button)
 // Vue.use(ButtonGroup)
 Vue.use(Table)
 Vue.use(TableColumn)
-// Vue.use(DatePicker)
+Vue.use(DatePicker)
 // Vue.use(TimeSelect)
-// Vue.use(TimePicker)
+Vue.use(TimePicker)
 // Vue.use(Popover)
-// Vue.use(Tooltip)
+Vue.use(Tooltip)
 // Vue.use(Breadcrumb)
 // Vue.use(BreadcrumbItem)
 Vue.use(Form)
@@ -128,8 +128,8 @@ Vue.use(FormItem)
 // Vue.use(Icon)
 // Vue.use(Row)
 // Vue.use(Col)
-// Vue.use(Upload)
-// Vue.use(Progress)
+Vue.use(Upload)
+Vue.use(Progress)
 // Vue.use(Spinner)
 // Vue.use(Badge)
 // Vue.use(Card)
