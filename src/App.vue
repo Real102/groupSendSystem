@@ -3,7 +3,15 @@
     <router-view />
   </div>
 </template>
-
+<script>
+export default {
+  name: 'app',
+  mounted() {
+    // 初始化所有国家-代码映射表
+    this.$store.dispatch('allCountryList')
+  }
+}
+</script>
 <style lang="less">
 #app {
   font-family: '微软雅黑', Helvetica, Arial, sans-serif;

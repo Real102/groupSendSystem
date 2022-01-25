@@ -1,13 +1,11 @@
 <template>
   <div class="sendTask">
-    <div class="sendWrap">
-      <div class="sendOne">
-        <span>任务名称</span>
-        <el-input type="text" size="small" v-model="sendData.task"></el-input>
-      </div>
-      <div class="sendOne">
-        <span>选择料子</span>
-        <el-select size="small" v-model="sendData.material">
+    <el-form class="sendWrap" ref="sendFormRef" :model="sendData" :rules="rule" label-width="100px">
+      <el-form-item label="任务名称" prop="task_name">
+        <el-input type="text" size="small" v-model="sendData.task_name"></el-input>
+      </el-form-item>
+      <el-form-item label="选择料子" prop="material_id">
+        <el-select size="small" v-model="sendData.material_id">
           <el-option
             v-for="item in materialData"
             :key="item.value"
@@ -15,47 +13,51 @@
             :value="item.value"
           ></el-option>
         </el-select>
-      </div>
-      <div class="sendOne">
-        <span>发送条数</span>
-        <el-input type="text" size="small" v-model="sendData.num"></el-input>
-      </div>
-      <div class="sendOne">
-        <span>料子国家</span>
+      </el-form-item>
+      <el-form-item label="发送条数" prop="task_num">
+        <el-input type="text" size="small" v-model="sendData.task_num"></el-input>
+      </el-form-item>
+      <el-form-item label="料子国家" prop="country">
         <el-select
           v-model="sendData.country"
           placeholder="请选择国家"
           size="small"
-          :disabled="isEdit"
+          disabled
+          filterable
         >
           <el-option
             v-for="item in mtCountry"
-            :key="item.value"
-            :label="item.name"
-            :value="item.value"
+            :key="item.country_code"
+            :label="item.country_name"
+            :value="item.country_code"
           >
           </el-option>
         </el-select>
-      </div>
-      <div class="sendOne">
-        <span>发送时间</span>
-        <el-date-picker v-model="sendData.time" type="date" placeholder="选择日期" size="small">
+      </el-form-item>
+      <el-form-item label="发送时间" prop="begin_time">
+        <el-date-picker
+          v-model="sendData.begin_time"
+          type="date"
+          placeholder="选择日期"
+          size="small"
+        >
         </el-date-picker>
-      </div>
-      <div class="sendOne">
-        <span>上传图片</span>
+      </el-form-item>
+      <el-form-item label="上传图片">
         <el-upload
           class="uploadWrap"
-          action="https://jsonplaceholder.typicode.com/posts/"
-          :on-change="handleChange"
+          ref="uploadRef"
+          action=""
+          :before-upload="handleBeforeUpload"
           :file-list="fileList"
+          :http-request="handleUpload"
+          :limit="1"
         >
           <el-button size="small" type="primary">点击上传</el-button>
           <span style="margin-left: 10px; color: red">0.02/条</span>
         </el-upload>
-      </div>
-      <div class="sendOne">
-        <span>发送内容</span>
+      </el-form-item>
+      <el-form-item label="发送内容" prop="content">
         <el-input
           type="textarea"
           v-model="sendData.content"
@@ -65,9 +67,8 @@
           maxlength="2000"
           show-word-limit
         ></el-input>
-      </div>
-      <div class="sendOne">
-        <span>替换客服号</span>
+      </el-form-item>
+      <el-form-item label="替换客服号">
         <div class="tmpl">
           <el-button type="text" style="line-height: 32px; padding: 0">点击复制模板</el-button>
           <p><span>__customerNums__</span> &nbsp;&nbsp;将此代码放入话术中，可平均推动客服号</p>
@@ -90,62 +91,122 @@
           </p>
           <p>....</p>
         </div>
-      </div>
-      <div class="sendOne">
-        <span>ws客服号</span>
+      </el-form-item>
+      <el-form-item label="ws客服号">
         <el-input
           type="textarea"
-          v-model="sendData.service"
+          v-model="sendData.customer_code"
           rows="5"
           resize="none"
           placeholder="用英文逗号(,)隔开添加客服号，必须在内容添加关键字__customerNums__"
         ></el-input>
-      </div>
+      </el-form-item>
       <div class="sendBtn">
         <el-button type="normal" size="small" @click="$router.go(-1)">取消</el-button>
-        <el-button type="primary" size="small">立即创建</el-button>
+        <el-button type="primary" size="small" @click="handleCreate">立即创建</el-button>
       </div>
-    </div>
+    </el-form>
   </div>
 </template>
 <script>
-import { mtCountry } from '@/utils/testData.js'
+import { uploadFile } from '@/api/sign.js'
+import { createTask, calculatePrice } from '@/api/custom.js'
 export default {
   name: 'sendTask',
   data() {
     return {
       fileList: [],
-      isEdit: false, // 当前是新建还是编辑
       sendData: {
-        task: '',
-        material: '',
-        num: '',
+        task_name: '',
+        material_id: '',
+        task_num: '',
         country: '',
-        time: '',
+        begin_time: '',
         content: '',
-        service: '',
-        filePath: ''
+        customer_code: '',
+        image_id: ''
       },
       materialData: [
-        { name: '从WA料子中获取', value: 1 },
+        { name: '从WA料子中获取', value: 100 },
         { name: '需要显示剩余的有效数', value: 2 },
         { name: '美国（有效数1000）', value: 3 }
-      ]
+      ],
+      rule: {
+        task_name: [{ required: true, trigger: 'blur', message: '请输入任务名称' }],
+        material_id: [{ required: true, trigger: 'blur', message: '请选择料子' }],
+        task_num: [{ required: true, trigger: 'blur', message: '请输入发送条数' }],
+        country: [{ required: true, trigger: 'blur', message: '请选择料子国家' }],
+        begin_time: [{ required: true, trigger: 'blur', message: '请选择发送时间' }],
+        content: [{ required: true, trigger: 'blur', message: '请输入发送内容' }]
+      }
     }
   },
   computed: {
     mtCountry() {
-      return mtCountry
+      return this.$store.state.allCountryList
     }
   },
   beforeRouteEnter(to, from, next) {
-    const data = localStorage.getItem('sendData')
-    next(vm => {
-      vm.isEdit = !!data
-    })
+    // const data = localStorage.getItem('sendData')
+    // TODO: 数据回显
+    next()
   },
   methods: {
-    handleChange() {}
+    handleBeforeUpload(file) {
+      // 上传的文件校验
+      const { name } = file
+      if (['png', 'jpg', 'jpeg'].every(i => name.indexOf(i) < -1)) {
+        this.$message.warning('请上传png，jpg，jpeg格式图片')
+        return false
+      }
+    },
+    handleUpload(e) {
+      // 自定义上传逻辑
+      const { file } = e
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('type', 0)
+      uploadFile(formData)
+        .then(res => {
+          this.$message.success('上传成功')
+          this.sendData.image_id = res.data.file_id
+        })
+        .catch(err => {
+          console.log(err)
+          this.$refs.uploadRef.clearFiles()
+        })
+    },
+    handleCreate() {
+      this.$refs.sendFormRef.validate(async valid => {
+        if (valid) {
+          try {
+            const calres = await calculatePrice(this.sendData)
+            const { price } = calres.data
+            this.$confirm(
+              `当前任务需要消耗【${price}】元，提交后则不能操作停止，请再次确认！`,
+              '确认创建群发任务？',
+              {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+              }
+            )
+              .then(() => {
+                // 先计算价格，用户二次确认之后再提交数据
+                createTask(this.sendData).then(() => {
+                  this.$message.success('创建成功！')
+                  this.$router.go(-1)
+                })
+              })
+              .catch(e => {
+                console.log(e)
+              })
+          } catch (err) {
+            console.log(err)
+          }
+        }
+      })
+    }
   }
 }
 </script>
@@ -155,14 +216,14 @@ export default {
     width: 1000px;
     display: flex;
     justify-content: flex-start;
-    align-items: center;
+    align-items: flex-start;
     flex-wrap: wrap;
-    .sendOne {
+    .el-form-item {
       width: 50%;
-      display: flex;
-      justify-content: flex-start;
-      align-items: flex-start;
       margin-bottom: 20px;
+      /deep/.el-form-item__content {
+        text-align: left;
+      }
       .el-input,
       .el-select {
         width: 350px;

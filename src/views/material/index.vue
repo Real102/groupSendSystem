@@ -5,14 +5,23 @@
       <el-button type="primary" size="small" icon="el-icon-upload" @click="handleUpload(false)"
         >上传料子</el-button
       >
-      <el-button type="danger" size="small" icon="el-icon-delete">批量删除</el-button>
+      <el-button type="danger" size="small" icon="el-icon-delete" @click="handleDelete"
+        >批量删除</el-button
+      >
       <el-input
         placeholder="文件名称"
         size="small"
         type="text"
-        v-model="searchData.fileName"
+        v-model="keyword"
+        @keyup.enter="initMaterialList('search')"
       ></el-input>
-      <el-button type="primary" size="small" icon="el-icon-search">查询</el-button>
+      <el-button
+        type="primary"
+        size="small"
+        icon="el-icon-search"
+        @click="initMaterialList('search')"
+        >查询</el-button
+      >
     </div>
     <!-- 表格数据 -->
     <div class="tableWrap">
@@ -23,7 +32,7 @@
         ref="materialTableRef"
       >
         <el-table-column type="selection" width="55"> </el-table-column>
-        <el-table-column prop="filename" label="文件名" min-width="200px"></el-table-column>
+        <el-table-column prop="material_name" label="文件名" min-width="200px"></el-table-column>
         <el-table-column prop="country" label="国家"></el-table-column>
         <el-table-column prop="uploadTimes" label="上传次数"></el-table-column>
         <el-table-column prop="uploadData" label="上传数据"></el-table-column>
@@ -33,7 +42,7 @@
           label="无效数据（含重复）"
           min-width="120px"
         ></el-table-column>
-        <el-table-column prop="createTime" label="创建时间" min-width="180px"></el-table-column>
+        <el-table-column prop="create_time" label="创建时间" min-width="180px"></el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
             <el-button @click="handleUpload(scope.row)" type="text" size="small"
@@ -62,17 +71,23 @@
       width="500px"
     >
       <!-- 如果是补充料子，那么国家下拉框不可编辑 -->
-      <Upload :isUpload="uploadTitle === '料子补充'"></Upload>
+      <Upload
+        :isUpload="uploadTitle === '料子补充'"
+        :countryCode="countryCode"
+        ref="uploadRef"
+        @handleSuccess="uploadDialogVisible = false"
+      ></Upload>
       <span slot="footer" class="dialog-footer">
         <el-button size="small" @click="uploadDialogVisible = false">取 消</el-button>
-        <el-button size="small" type="primary">确 定</el-button>
+        <el-button size="small" type="primary" @click="handleConfirm">确 定</el-button>
       </span>
     </el-dialog>
   </div>
 </template>
 <script>
-import { testMaterialData } from '@/utils/testData.js'
 import Upload from './upload.vue'
+import { getMaterialList, deleteMaterial } from '@/api/custom.js'
+import { parseTime } from '@/utils/index.js'
 export default {
   name: 'material',
   components: {
@@ -80,34 +95,35 @@ export default {
   },
   data() {
     return {
-      searchData: {
-        fileName: ''
-      },
+      keyword: '',
       // TODO: 只是测试数据，还需要换成接口的数据
-      materialData: testMaterialData,
+      materialData: [],
       selectedItems: [], // 已选择的项的id
       uploadTitle: '料子上传', // 弹框的标题
       uploadDialogVisible: false, // 弹框显示与否
+      countryCode: '',
       paginationData: {
         // 表单数据
         currentPage: 1,
         sizes: [10, 30, 50, 100],
         pageSize: 10,
-        total: testMaterialData.length
+        total: 0
       }
     }
   },
-  mounted() {},
+  mounted() {
+    this.initMaterialList()
+  },
   methods: {
     handleSizeChange(val) {
       this.paginationData.pageSize = val
       // 如果已选择了table的某项，切换页码或页数的时候需要初始化一下
-      this.handleSelectionChange()
+      this.initMaterialList()
     },
     handleCurrentChange(val) {
       this.paginationData.currentPage = val
       // 如果已选择了table的某项，切换页码或页数的时候需要初始化一下
-      this.handleSelectionChange()
+      this.initMaterialList()
     },
     handleSelectionChange(rows) {
       // 点选了table项触发事件
@@ -121,9 +137,68 @@ export default {
         // 如果没有带rows参数。可以认为是切换页码触发的事件，需要显示之前选择的项
         this.materialData.forEach(i => {
           if (this.selectedItems.includes(i.id)) {
-            this.$refs.materialTableRef.toggleRowSelection(i)
+            setTimeout(() => {
+              // 需要加个延迟或者nextTick，否则会回显失败
+              this.$refs.materialTableRef.toggleRowSelection(i)
+            }, 0)
           }
         })
+      }
+    },
+    initMaterialList(flag) {
+      // 初始化料子列表，包括关键字搜索功能
+      const data = {
+        page: this.paginationData.currentPage,
+        'per-page': this.paginationData.pageSize,
+        keyword: flag === 'search' ? this.keyword : undefined
+      }
+      getMaterialList(data)
+        .then(res => {
+          const { list } = res.data
+          this.paginationData.total = res.data.total
+          // 这里需要格式化一下数据
+          this.formatData(list)
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    },
+    formatData(list) {
+      // 列表数据格式化
+      this.materialData = []
+      list.forEach((item, index) => {
+        item.create_time = parseTime(item.create_time)
+        item.id = ++index
+        this.materialData.push(item)
+      })
+      this.handleSelectionChange()
+    },
+    handleDelete() {
+      // 点击批量删除按钮
+      if (this.selectedItems.length <= 0) {
+        this.$message.warning('请至少选择一项！')
+      } else {
+        this.$confirm('请再次确认是否删除料子', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+          .then(() => {
+            const data = {
+              id: this.selectedItems.join(',')
+            }
+            deleteMaterial(data)
+              .then(() => {
+                this.$message.success('删除成功！')
+                this.initMaterialList()
+              })
+              .catch(err => {
+                console.log(err)
+              })
+          })
+          .catch(e => {
+            console.log(e)
+          })
       }
     },
     handleUpload(row) {
@@ -131,9 +206,14 @@ export default {
       this.uploadDialogVisible = true
       if (row) {
         this.uploadTitle = '料子补充'
+        this.countryCode = row.country_code
       } else {
         this.uploadTitle = '料子上传'
       }
+    },
+    handleConfirm() {
+      // 弹框点击确定触发事件
+      this.$refs.uploadRef.handleSubmit()
     }
   }
 }

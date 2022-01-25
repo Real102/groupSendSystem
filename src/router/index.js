@@ -5,8 +5,10 @@ Vue.use(VueRouter)
 
 const Layout = () => import('@/layout/index.vue')
 
-export const asyncRoutes = [
+export const userRoutes = [
+  // 前台页面
   {
+    // 方便起见，直接前后台都搞一个home路由
     path: '/home',
     component: Layout,
     meta: { title: '首页', icon: 'icon-home' },
@@ -18,7 +20,6 @@ export const asyncRoutes = [
       }
     ]
   },
-  // 前台页面
   {
     path: '/material',
     name: 'material',
@@ -51,8 +52,23 @@ export const asyncRoutes = [
         meta: { title: '新建群发任务', hideSideBar: true }
       }
     ]
-  },
+  }
+]
+
+export const managerRoutes = [
   // 后台页面
+  {
+    path: '/home',
+    component: Layout,
+    meta: { title: '首页', icon: 'icon-home' },
+    children: [
+      {
+        path: '/home/index',
+        component: () => import(/* webpackChunkName: "home" */ '@/views/home/index.vue'),
+        meta: { title: '首页' }
+      }
+    ]
+  },
   {
     path: '/custom',
     name: 'custom',
@@ -99,7 +115,10 @@ export const asyncRoutes = [
         meta: { title: '任务管理' }
       }
     ]
-  },
+  }
+]
+
+export const asyncRoutes = [
   // 公共页面
   {
     path: '/log',
@@ -182,7 +201,7 @@ const router = createRouter()
 export function resetRouter() {
   const newRouter = createRouter()
   router.matcher = newRouter.matcher
-  const r = asyncRoutes
+  const r = userRoutes.concat(asyncRoutes)
   r.forEach(i => router.addRoute(i))
 }
 

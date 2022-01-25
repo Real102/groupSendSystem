@@ -9,11 +9,11 @@
           autocomplete="new-password"
           style="position: absolute; top: -9999px; left: 0; opacity: 0"
         />
-        <el-form-item prop="username">
+        <el-form-item prop="account">
           <el-input
             type="text"
             placeholder="请输入账号"
-            v-model="loginData.username"
+            v-model="loginData.account"
             prefix-icon="el-icon-user"
             autocomplete="off"
           >
@@ -48,11 +48,11 @@ export default {
   data() {
     return {
       loginData: {
-        username: '',
+        account: '',
         password: ''
       },
       rule: {
-        username: [{ required: true, trigger: 'blur', validator: this.usernameValid }],
+        account: [{ required: true, trigger: 'blur', validator: this.accountValid }],
         password: [{ required: true, trigger: 'blur', validator: this.pwdValid }]
       }
     }
@@ -66,8 +66,15 @@ export default {
         // 校验表单
         if (valid) {
           getLogin(this.loginData)
-            .then(res => {
-              console.log(res)
+            .then(() => {
+              this.$message({
+                message: '登录成功！',
+                type: 'success',
+                duration: 2000,
+                onClose: function () {
+                  this.$router.push('/home/index')
+                }
+              })
             })
             .catch(err => {
               console.log(err)
@@ -75,7 +82,7 @@ export default {
         }
       })
     },
-    usernameValid(rule, value, cb) {
+    accountValid(rule, value, cb) {
       const EMail = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/
       if (!value.match(EMail)) {
         return cb(new Error('请输入正确格式的账号'))

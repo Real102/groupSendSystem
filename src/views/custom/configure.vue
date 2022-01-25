@@ -6,9 +6,9 @@
         <el-select v-model="sw" size="small" placeholder="请选择群发渠道">
           <el-option
             v-for="item in swList"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id"
+            :key="item.channel_id"
+            :label="item.channel_name"
+            :value="item.channel_id"
           ></el-option>
         </el-select>
         <div class="swTips">
@@ -41,7 +41,7 @@
           <span>上分数量：</span>
           <el-radio-group v-model="scoreStatus">
             <el-radio :label="1">增加</el-radio>
-            <el-radio :label="2">减少</el-radio>
+            <el-radio :label="0">减少</el-radio>
           </el-radio-group>
         </div>
         <div class="scoreOne">
@@ -53,12 +53,26 @@
   </div>
 </template>
 <script>
+import { setSendWay, editRemark, setScore } from '@/api/manager.js'
 export default {
   name: 'configure',
   props: {
     configData: {
       required: true,
       type: Object
+    },
+    swList: {
+      required: true,
+      type: Array
+    }
+  },
+  watch: {
+    configData: {
+      handler: function () {
+        // 初始化备注的信息
+        this.remark = this.configData.remark
+      },
+      deep: true
     }
   },
   data() {
@@ -66,22 +80,53 @@ export default {
       sw: 1,
       remark: '',
       scoreStatus: 1,
-      score: '',
-      swList: [
-        {
-          name: '使用尚信群发接口',
-          id: 1
-        },
-        {
-          name: '使用xx群发接口',
-          id: 2
-        }
-      ]
+      score: ''
     }
   },
   methods: {
     handleSubmit() {
       // 提交按钮点击事件，根据flag来判断是哪个弹框，然后提交到对应的接口
+      if (this.configData.flag === 1) {
+        // 群发渠道配置的弹框
+        const data = {
+          id: this.sw
+        }
+        setSendWay(data)
+          .then(() => {
+            this.$message.success('更换成功！')
+            this.$emit('submitSuccess')
+          })
+          .catch(err => {
+            console.log(err)
+          })
+      } else if (this.configData.flag === 2) {
+        const data = {
+          uid: this.configData.uid,
+          remark: this.remark
+        }
+        editRemark(data)
+          .then(() => {
+            this.$message.success('修改成功！')
+            this.$emit('submitSuccess')
+          })
+          .catch(err => {
+            console.log(err)
+          })
+      } else if (this.configData.flag === 3) {
+        const data = {
+          uid: this.configData.uid,
+          score: this.score,
+          type: this.scoreStatus
+        }
+        setScore(data)
+          .then(() => {
+            this.$message.success('上分成功！')
+            this.$emit('submitSuccess')
+          })
+          .catch(err => {
+            console.log(err)
+          })
+      }
     }
   }
 }

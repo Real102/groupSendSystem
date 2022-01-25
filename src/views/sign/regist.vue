@@ -11,11 +11,11 @@
           autocomplete="new-password"
           style="position: absolute; top: -9999px; left: 0; opacity: 0"
         />
-        <el-form-item prop="username">
+        <el-form-item prop="account">
           <el-input
             type="text"
             placeholder="请输入电子邮箱账号"
-            v-model="registData.username"
+            v-model="registData.account"
             prefix-icon="el-icon-user"
             autocomplete="off"
           >
@@ -67,7 +67,7 @@ export default {
   data() {
     return {
       registData: {
-        username: '',
+        account: '',
         password: '',
         repassword: '',
         code: ''
@@ -78,7 +78,7 @@ export default {
         time: 0
       },
       rule: {
-        username: [{ required: true, trigger: 'blur', validator: this.usernameValid }],
+        account: [{ required: true, trigger: 'blur', validator: this.accountValid }],
         password: [{ required: true, trigger: 'blur', validator: this.pwdValid }],
         repassword: [{ required: true, trigger: 'blur', validator: this.repwdValid }],
         code: [{ required: true, trigger: 'blur', message: '请输入验证码' }]
@@ -88,7 +88,7 @@ export default {
   methods: {
     getCode() {
       // 点击获取邮箱验证码
-      this.$refs.registFormRef.validateField('username', err => {
+      this.$refs.registFormRef.validateField('account', err => {
         if (!err) {
           this.getCaptcha()
           this.captcha.isDisabled = true
@@ -109,19 +109,13 @@ export default {
     },
     getCaptcha() {
       // 获取验证码接口请求
-      const { username } = this.registData
-      getCaptcha({ username })
-        .then(res => {
-          console.log(res)
+      const { account } = this.registData
+      getCaptcha({ account })
+        .then(() => {
+          this.$message.success('验证码已发送')
         })
         .catch(err => {
-          this.$message({
-            type: 'error',
-            message: '获取验证码失败',
-            onClose: () => {
-              this.captcha.isDisabled = false
-            }
-          })
+          this.captcha.isDisabled = false
           console.log(err)
         })
     },
@@ -129,9 +123,20 @@ export default {
       // 提交注册事件
       this.$refs.registFormRef.validate(valid => {
         if (valid) {
-          getRegist(this.registData)
-            .then(res => {
-              console.log(res)
+          getRegist({
+            account: this.registData.account,
+            password: this.registData.password,
+            code: this.registData.code
+          })
+            .then(() => {
+              this.$message({
+                message: '注册成功！',
+                type: 'success',
+                duration: 2000,
+                onClose: function () {
+                  this.$router.push('/login')
+                }
+              })
             })
             .catch(err => {
               console.log(err)
@@ -139,7 +144,7 @@ export default {
         }
       })
     },
-    usernameValid(rule, value, cb) {
+    accountValid(rule, value, cb) {
       const EMail = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/
       if (!value.match(EMail)) {
         return cb(new Error('请输入正确格式的电子邮箱账号'))

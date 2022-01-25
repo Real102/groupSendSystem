@@ -298,6 +298,9 @@ export default {
           border-radius: 0;
         }
       }
+      &:first-child {
+        margin-left: 0;
+      }
     }
     .el-button {
       margin-left: 20px;

@@ -15,7 +15,7 @@
 <script>
 import item from './item.vue'
 import subItem from './subItem.vue'
-import { asyncRoutes } from '@/router/index.js'
+import { asyncRoutes, userRoutes, managerRoutes } from '@/router/index.js'
 export default {
   name: 'SideBar',
   components: {
@@ -47,7 +47,9 @@ export default {
   },
   mounted() {
     this.routerData = []
-    asyncRoutes.forEach(rt => {
+    const endRoutes = userRoutes.concat(asyncRoutes)
+    console.log(managerRoutes)
+    endRoutes.forEach(rt => {
       // 处理路由格式，区分只有一个子页面和多个子页面的情况
       // 统一数据格式，便于遍历
       if (!['/404', '*', '/'].includes(rt.path)) {

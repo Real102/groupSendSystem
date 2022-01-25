@@ -51,8 +51,8 @@
         <el-table-column type="selection" width="55"> </el-table-column>
         <el-table-column prop="account" label="账号" min-width="200px"></el-table-column>
         <el-table-column prop="status" label="状态"></el-table-column>
-        <el-table-column prop="overage" label="余额（元）"></el-table-column>
-        <el-table-column prop="createTime" label="注册时间" min-width="180px"></el-table-column>
+        <el-table-column prop="balance" label="余额（元）"></el-table-column>
+        <el-table-column prop="create_time" label="注册时间" min-width="180px"></el-table-column>
         <el-table-column prop="remark" label="备注"></el-table-column>
         <el-table-column label="操作" min-width="150px">
           <template slot-scope="scope">
@@ -80,7 +80,12 @@
       :close-on-click-modal="false"
       width="500px"
     >
-      <Configure :configData="configData" ref="configureRef"></Configure>
+      <Configure
+        :configData="configData"
+        ref="configureRef"
+        :swList="swList"
+        @submitSuccess="handleSuccess"
+      ></Configure>
       <span slot="footer" class="dialog-footer">
         <el-button size="small" @click="dialogVisible = false">取 消</el-button>
         <el-button size="small" type="primary" @click="handleSave">{{ confirmBtnText }}</el-button>
@@ -89,8 +94,9 @@
   </div>
 </template>
 <script>
-import { testCustomData } from '@/utils/testData.js'
 import Configure from './configure.vue'
+import { getAccountList, getSendWayList, stopAccount, openAccount } from '@/api/manager.js'
+import { parseTime } from '@/utils/index.js'
 export default {
   name: 'custom',
   components: {
@@ -98,18 +104,21 @@ export default {
   },
   data() {
     return {
+      customData: [], // 列表数据
       selectedItems: [], // 被选中的项的id
       dialogTitle: '群发渠道配置', // 弹框的标题
       dialogVisible: false, // 弹框显示与否
       confirmBtnText: '确认更换', // 弹框确认按钮的文案
+      swList: [], // 群发渠道列表
       searchData: {
         seatchItem: '',
         searchValue: ''
       },
       configData: {
         // 传id和类型，这个页面的弹框部分都合并到一个组件中了，需要通过flag来判断
-        id: 1,
-        flag: 1
+        uid: 1,
+        flag: 1,
+        remark: ''
       },
       searchItemList: [
         {
@@ -127,15 +136,15 @@ export default {
       ],
       statusListData: [
         {
-          id: 1,
+          id: 2,
           name: '全部'
         },
         {
-          id: 2,
+          id: 1,
           name: '正常'
         },
         {
-          id: 3,
+          id: 0,
           name: '停用'
         }
       ],
@@ -144,25 +153,23 @@ export default {
         currentPage: 1,
         sizes: [10, 30, 50, 100],
         pageSize: 10,
-        total: testCustomData.length
+        total: 0
       }
     }
   },
-  computed: {
-    customData() {
-      return testCustomData
-    }
+  mounted() {
+    this.initAccountList()
   },
   methods: {
     handleSizeChange(val) {
       this.paginationData.pageSize = val
+      this.initAccountList()
       // 如果已选择了table的某项，切换页码或页数的时候需要初始化一下
-      this.handleSelectionChange()
     },
     handleCurrentChange(val) {
       this.paginationData.currentPage = val
+      this.initAccountList()
       // 如果已选择了table的某项，切换页码或页数的时候需要初始化一下
-      this.handleSelectionChange()
     },
     createAccount() {
       // 点击开通账号事件
@@ -172,54 +179,124 @@ export default {
       // 点击启用账号事件
       if (this.selectedItems.length <= 0) {
         this.$message.error('请至少选择一项后再启用')
+      } else {
+        openAccount({ uid: this.selectedItems.join(',') })
+          .then(() => {
+            this.$message.success('启用成功')
+            this.initAccountList()
+          })
+          .catch(err => {
+            console.log(err)
+          })
       }
     },
     handleClose() {
       // 点击停用账号事件
       if (this.selectedItems.length <= 0) {
         this.$message.error('请至少选择一项后再停用')
+      } else {
+        stopAccount({ uid: this.selectedItems.join(',') })
+          .then(() => {
+            this.$message.success('停用成功')
+            this.initAccountList()
+          })
+          .catch(err => {
+            console.log(err)
+          })
       }
     },
     handleSendWay() {
       // 群发渠道配置弹框
-      this.dialogVisible = true
-      this.dialogTitle = '群发渠道配置'
-      this.confirmBtnText = '确认更换'
-      this.configData.flag = 1
+      // 增加个判断，避免每次点击按钮都请求接口
+      if (this.swList.length <= 0) {
+        getSendWayList().then(res => {
+          this.swList = res.data
+          this.dialogVisible = true
+          this.dialogTitle = '群发渠道配置'
+          this.confirmBtnText = '确认更换'
+          this.configData.flag = 1
+          this.configData.uid = undefined
+        })
+      } else {
+        this.dialogVisible = true
+        this.dialogTitle = '群发渠道配置'
+        this.confirmBtnText = '确认更换'
+        this.configData.flag = 1
+        this.configData.uid = undefined
+      }
     },
-    handleEdit() {
+    handleEdit(row) {
       // 点击编辑备注按钮事件
       this.dialogVisible = true
       this.dialogTitle = '编辑'
       this.confirmBtnText = '确定'
       this.configData.flag = 2
+      this.configData.uid = row.uid
+      this.configData.remark = row.remark
     },
-    handleClick() {
+    handleClick(row) {
       // 点击上分按钮事件
       this.dialogVisible = true
       this.dialogTitle = '上分设置'
       this.confirmBtnText = '确定保存'
       this.configData.flag = 3
+      this.configData.uid = row.uid
     },
     handleSave() {
+      // 点击确定按钮触发事件
       this.$refs.configureRef.handleSubmit()
+    },
+    handleSuccess() {
+      // 接口提交成功后触发事件
+      this.dialogVisible = false
     },
     handleSelectionChange(rows) {
       // 点选了table项触发事件
       // 先清空已选择的数组，然后再遍历push每一项的id
-      if (rows) {
-        this.selectedItems = []
-        rows.forEach(row => {
-          this.selectedItems.push(row.id)
-        })
-      } else if (this.selectedItems.length > 0) {
-        // 如果没有带rows参数。可以认为是切换页码触发的事件，需要显示之前选择的项
-        this.materialData.forEach(i => {
-          if (this.selectedItems.includes(i.id)) {
-            this.$refs.customTableRef.toggleRowSelection(i)
+      this.$nextTick(() => {
+        if (rows) {
+          rows.forEach(row => {
+            this.selectedItems.push(row.uid)
+          })
+          this.selectedItems = [...new Set(this.selectedItems)]
+        } else {
+          if (this.selectedItems.length > 0) {
+            // 如果没有带rows参数。可以认为是切换页码触发的事件，需要显示之前选择的项
+            this.$refs.customTableRef.clearSelection()
+            this.customData.forEach(i => {
+              if (this.selectedItems.includes(i.uid)) {
+                this.$refs.customTableRef.toggleRowSelection(i)
+              }
+            })
           }
-        })
+        }
+      })
+    },
+    initAccountList() {
+      // 初始化账号列表
+      this.logData = []
+      const params = {
+        page: this.paginationData.currentPage,
+        'per-page': this.paginationData.pageSize
       }
+      getAccountList(params)
+        .then(res => {
+          const { list } = res.data
+          this.paginationData.total = res.data.total
+          this.customData = []
+          list.forEach(item => {
+            const ts = this.statusListData.find(i => i.id === item.status)
+            this.customData.push({
+              ...item,
+              status: ts?.name || '',
+              create_time: parseTime(item.create_time)
+            })
+          })
+          this.handleSelectionChange()
+        })
+        .catch(err => {
+          console.log(err)
+        })
     }
   }
 }

@@ -1,29 +1,54 @@
 <template>
   <div class="customPart">
-    <div class="account">账户余额<span>111,222,000</span>元</div>
+    <div class="account">
+      账户余额
+      <span>{{ balance }}</span>
+      元
+    </div>
     <div class="priceTable">
       <span>产品价格明细</span>
       <el-table :data="priceData" stripe>
-        <el-table-column prop="country" label="国家"></el-table-column>
+        <el-table-column prop="country_name" label="国家"></el-table-column>
         <el-table-column prop="price" label="单价（元）"></el-table-column>
       </el-table>
     </div>
   </div>
 </template>
 <script>
-import { testPriceData } from '@/utils/testData.js'
+import { getUserBalance, getPriceList } from '@/api/custom.js'
 export default {
   name: 'customPart',
   data() {
     return {
-      priceData: testPriceData
+      balance: '0.00',
+      priceData: []
     }
   },
   mounted() {
+    this.initUserBalance()
     this.initPriceList()
   },
   methods: {
-    initPriceList() {}
+    initPriceList() {
+      // 初始化产品价格明细
+      getPriceList()
+        .then(res => {
+          this.priceData = res.data.list
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    },
+    initUserBalance() {
+      // 用户账户余额
+      getUserBalance()
+        .then(res => {
+          this.balance = res.data.balance
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    }
   }
 }
 </script>
