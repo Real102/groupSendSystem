@@ -9,6 +9,8 @@ export default {
   mounted() {
     // 初始化所有国家-代码映射表
     this.$store.dispatch('allCountryList')
+    const role = localStorage.getItem('role')
+    this.$store.commit('SET_ROLE', role)
   }
 }
 </script>

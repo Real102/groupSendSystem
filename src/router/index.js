@@ -199,9 +199,19 @@ const createRouter = () =>
 const router = createRouter()
 
 export function resetRouter() {
+  const role = localStorage.getItem('role')
+  console.log('resetRoute：' + role)
   const newRouter = createRouter()
   router.matcher = newRouter.matcher
-  const r = userRoutes.concat(asyncRoutes)
+  let r = []
+  if (role === 0) {
+    console.log('role = 0 ?')
+    r = managerRoutes.concat(asyncRoutes)
+  } else if (role === 1) {
+    r = userRoutes.concat(asyncRoutes)
+  } else {
+    r = asyncRoutes
+  }
   r.forEach(i => router.addRoute(i))
 }
 

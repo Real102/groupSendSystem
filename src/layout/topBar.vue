@@ -26,6 +26,7 @@
 
 <script>
 import { MAIN_TITLE } from '@/setting.js'
+import { setToken } from '@/utils/auth.js'
 
 export default {
   name: 'topBar',
@@ -54,6 +55,9 @@ export default {
     handleDropdownCommand(dropdownItem) {
       switch (dropdownItem.name) {
         case '退出登录':
+          setToken('')
+          localStorage.removeItem('role')
+          this.$router.push('/login')
           this.$message.success('退出成功')
           break
         case '修改密码':

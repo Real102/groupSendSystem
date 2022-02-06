@@ -84,6 +84,7 @@ export default {
       dialogVisible: false, // 弹框显示与否
       priceData: [],
       ctData: {
+        country_name: '',
         country_code: '',
         price: ''
       },
@@ -98,6 +99,17 @@ export default {
         country_code: [{ required: true, trigger: 'blur', message: '请选择国家' }],
         price: [{ required: true, trigger: 'blur', message: '请输入单价' }]
       }
+    }
+  },
+  watch: {
+    'ctData.country_code': {
+      handler: function (val) {
+        if (val) {
+          const res = this.remainCountryList.find(i => i.country_code === val)
+          this.ctData.country_name = res?.country_name
+        }
+      },
+      deep: true
     }
   },
   mounted() {
@@ -241,6 +253,7 @@ export default {
             .then(() => {
               this.$message.success('添加成功！')
               this.dialogVisible = false
+              this.initPriceList()
             })
             .catch(err => {
               console.log(err)

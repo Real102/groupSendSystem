@@ -43,6 +43,7 @@
 <script>
 import { MAIN_TITLE } from '@/setting.js'
 import { getLogin } from '@/api/sign.js'
+import { setToken } from '@/utils/auth'
 export default {
   name: 'login',
   data() {
@@ -66,12 +67,16 @@ export default {
         // 校验表单
         if (valid) {
           getLogin(this.loginData)
-            .then(() => {
+            .then(res => {
+              const { token, role } = res.data
+              setToken(token)
+              localStorage.setItem('role', role)
+              this.$store.commit('SET_ROLE', role)
               this.$message({
                 message: '登录成功！',
                 type: 'success',
                 duration: 2000,
-                onClose: function () {
+                onClose: () => {
                   this.$router.push('/home/index')
                 }
               })

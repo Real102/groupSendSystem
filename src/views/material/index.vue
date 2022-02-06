@@ -74,8 +74,9 @@
       <Upload
         :isUpload="uploadTitle === '料子补充'"
         :countryCode="countryCode"
+        :uploadId="uploadId"
         ref="uploadRef"
-        @handleSuccess="uploadDialogVisible = false"
+        @handleSuccess="handleSuccess"
       ></Upload>
       <span slot="footer" class="dialog-footer">
         <el-button size="small" @click="uploadDialogVisible = false">取 消</el-button>
@@ -102,6 +103,7 @@ export default {
       uploadTitle: '料子上传', // 弹框的标题
       uploadDialogVisible: false, // 弹框显示与否
       countryCode: '',
+      uploadId: '',
       paginationData: {
         // 表单数据
         currentPage: 1,
@@ -206,7 +208,8 @@ export default {
       this.uploadDialogVisible = true
       if (row) {
         this.uploadTitle = '料子补充'
-        this.countryCode = row.country_code
+        this.uploadId = row.id
+        this.countryCode = row.country_id
       } else {
         this.uploadTitle = '料子上传'
       }
@@ -214,6 +217,10 @@ export default {
     handleConfirm() {
       // 弹框点击确定触发事件
       this.$refs.uploadRef.handleSubmit()
+    },
+    handleSuccess() {
+      this.initMaterialList()
+      this.uploadDialogVisible = false
     }
   }
 }

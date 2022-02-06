@@ -45,12 +45,13 @@
 </template>
 <script>
 import { uploadFile } from '@/api/sign.js'
-import { uploadMaterial } from '@/api/custom.js'
+import { uploadMaterial, reuploadMaterial } from '@/api/custom.js'
 export default {
   name: 'upload',
   props: {
     isUpload: Boolean,
-    countryCode: String
+    countryCode: String,
+    uploadId: String
   },
   data() {
     return {
@@ -103,18 +104,33 @@ export default {
     },
     handleSubmit() {
       // 弹框点击确定上传料子或补充料子触发接口
-      const data = {
-        file_id: this.file_id,
-        country_id: this.country
+      if (!this.isUpload) {
+        const data = {
+          file_id: this.file_id,
+          country_id: this.country
+        }
+        uploadMaterial(data)
+          .then(() => {
+            this.$message.success('上传成功')
+            this.$emit('handleSuccess')
+          })
+          .catch(err => {
+            console.log(err)
+          })
+      } else {
+        const data2 = {
+          file_id: this.file_id,
+          id: this.uploadId
+        }
+        reuploadMaterial(data2)
+          .then(() => {
+            this.$message.success('料子补充成功')
+            this.$emit('handleSuccess')
+          })
+          .catch(err => {
+            console.log(err)
+          })
       }
-      uploadMaterial(data)
-        .then(() => {
-          this.$message.success(this.isUpload ? '料子补充成功' : '上传成功')
-          this.$emit('handleSuccess')
-        })
-        .catch(err => {
-          console.log(err)
-        })
     }
   }
 }

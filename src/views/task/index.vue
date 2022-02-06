@@ -18,7 +18,7 @@
           v-if="searchData.taskName !== 'taskStatus'"
         ></el-input>
         <el-select
-          v-model="searchData.taskStatus"
+          v-model="searchData.taskValue"
           placeholder="请选择任务状态"
           size="small"
           clearable
@@ -51,33 +51,38 @@
         >
         </el-date-picker>
       </div>
-      <el-button type="primary" size="small" icon="el-icon-search">查询</el-button>
-      <el-button type="normal" size="small" icon="el-icon-refresh-right">重置</el-button>
+      <el-button type="primary" size="small" icon="el-icon-search" @click="handleSearch"
+        >查询</el-button
+      >
+      <el-button type="normal" size="small" icon="el-icon-refresh-right" @click="handleReset"
+        >重置</el-button
+      >
     </div>
     <!-- 表格展示数据 -->
     <div class="tableWrap">
       <el-table :data="sendData" stripe ref="sendTableRef">
         <el-table-column prop="order" label="序号" width="55"></el-table-column>
-        <el-table-column prop="taskId" label="任务id"></el-table-column>
+        <el-table-column prop="task_sn" label="任务id"></el-table-column>
         <el-table-column prop="account" label="用户账号"></el-table-column>
-        <el-table-column prop="sendWay" label="当前群发渠道"></el-table-column>
-        <el-table-column prop="taskName" label="任务名称"></el-table-column>
-        <el-table-column prop="materialName" label="料子名称"></el-table-column>
+        <el-table-column prop="channel_name" label="当前群发渠道"></el-table-column>
+        <el-table-column prop="task_name" label="任务名称"></el-table-column>
+        <el-table-column prop="material_name" label="料子名称"></el-table-column>
         <el-table-column prop="amount" label="金额（元）"></el-table-column>
-        <el-table-column prop="taskNum" label="任务数（条）"></el-table-column>
-        <el-table-column prop="resolveNum" label="完成数（条）"></el-table-column>
+        <el-table-column prop="task_num" label="任务数（条）"></el-table-column>
+        <el-table-column prop="complete_num" label="完成数（条）"></el-table-column>
         <el-table-column prop="country" label="国家"></el-table-column>
         <el-table-column prop="status" label="状态"></el-table-column>
-        <el-table-column prop="startTime" label="开始时间"></el-table-column>
-        <el-table-column prop="endTime" label="完成时间"></el-table-column>
-        <el-table-column prop="reason" label="异常原因"></el-table-column>
+        <el-table-column prop="begin_time" label="开始时间"></el-table-column>
+        <el-table-column prop="end_time" label="完成时间"></el-table-column>
+        <el-table-column prop="err_reason" label="异常原因"></el-table-column>
         <el-table-column label="操作" width="120px">
           <template slot-scope="scope">
             <el-select
-              v-model="operate"
+              v-model="scope.row.operate"
               size="small"
               @change="handleChageOperation(scope.row)"
               placeholder="更多操作"
+              clearable
             >
               <el-option
                 v-for="item in handlerList"
@@ -110,18 +115,16 @@
     >
       <div>
         <div class="sendDetailDialog" v-if="sendDialogTitle === '查看内容'">
-          这是内容这是内容这是内容这是内容这是内容这是内容这是内容
-          这是内容这是内容这是内容这是内容这是内容这是内容这是内容
-          这是内容这是内容这是内容这是内容这是内容这是内容这是内容
+          {{ err_reason }}
         </div>
         <div class="gsEdit" v-else>
           <span class="redStar">选择群发渠道：</span>
           <el-select v-model="sw" size="small" placeholder="请选择群发渠道">
             <el-option
               v-for="item in swList"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
+              :key="item.channel_id"
+              :label="item.channel_name"
+              :value="item.channel_id"
             ></el-option>
           </el-select>
           <div class="swTips">
@@ -144,30 +147,32 @@
   </div>
 </template>
 <script>
-import { testSendData } from '@/utils/testData.js'
+import { getTaskList } from '@/api/manager.js'
+import { parseTime } from '@/utils/index.js'
 export default {
   name: 'task',
   data() {
     return {
       sendDialogTitle: '查看内容', // 弹框标题
       sendDialogVisible: false, // 弹框显隐状态
+      err_reason: '', // 当前弹框显示的异常内容
       sw: '',
+      sendData: [],
       searchData: {
         taskName: 'taskname',
         taskValue: '',
         timeName: 'startTime',
         timeValue: ''
       },
-      operate: '',
       handlerList: [
         {
           name: '查看内容',
           value: 1
         },
-        {
-          name: '停止任务',
-          value: 2
-        },
+        // {
+        //   name: '停止任务',
+        //   value: 2
+        // },
         {
           name: '更换渠道执行',
           value: 3
@@ -203,30 +208,20 @@ export default {
       ],
       taskStatusData: [
         {
-          id: 1,
+          id: 3,
           name: '全部'
         },
         {
-          id: 2,
+          id: 0,
           name: '待执行'
         },
         {
-          id: 3,
+          id: 1,
           name: '执行中'
         },
         {
-          id: 4,
+          id: 2,
           name: '已完成'
-        }
-      ],
-      swList: [
-        {
-          name: '使用尚信群发接口',
-          id: 1
-        },
-        {
-          name: '使用xx群发接口',
-          id: 2
         }
       ],
       paginationData: {
@@ -238,17 +233,38 @@ export default {
       }
     }
   },
-  computed: {
-    sendData() {
-      return testSendData
+  watch: {
+    'searchData.taskName': {
+      handler: function () {
+        this.searchData.taskValue = ''
+      },
+      immediate: true,
+      deep: true
     }
+  },
+  computed: {
+    swList() {
+      return this.$store.state.swList
+    }
+  },
+  mounted() {
+    this.initTaskList()
   },
   methods: {
     handleSizeChange(val) {
       this.paginationData.pageSize = val
+      this.initTaskList()
     },
     handleCurrentChange(val) {
       this.paginationData.currentPage = val
+      this.initTaskList()
+    },
+    handleReset() {
+      this.searchData = this.$options.data().searchData
+    },
+    handleSearch() {
+      this.paginationData.currentPage = 1
+      this.initTaskList()
     },
     handleConfirm() {
       // 弹框点击确定按钮触发
@@ -260,16 +276,68 @@ export default {
     },
     handleChageOperation(row) {
       // 切换操作的时候触发事件
-      if (this.operate === 1) {
+      if (row.operate === 1) {
         this.sendDialogVisible = true
         this.sendDialogTitle = '查看内容'
-      } else if (this.operate === 3) {
-        this.sendDialogVisible = true
-        this.sendDialogTitle = '更换渠道'
+        this.err_reason = row.err_reason || '暂无内容'
+      } else if (row.operate === 3) {
+        // 增加个判断，避免每次点击按钮都请求接口
+        // if (this.swList.length <= 0) {
+        //   this.$store.dispatch('getSwList').then(() => {
+        //     this.sendDialogVisible = true
+        //     this.sendDialogTitle = '更换渠道'
+        //   })
+        // } else {
+        //   this.sendDialogVisible = true
+        //   this.sendDialogTitle = '更换渠道'
+        // }
+        // 目前只有一个渠道，暂时只弹框提示用户
+        this.$message.info('目前只有一个群发渠道，暂不支持更换！')
       } else {
         // 点击删除
         console.log(row.id)
       }
+    },
+    initTaskList() {
+      const params = {
+        page: this.paginationData.currentPage,
+        'per-page': this.paginationData.pageSize,
+        time_type: this.searchData.timeName === 'startTime' ? 1 : 2,
+        // 字段用的都是同一个，但接口是分开的，所以...略微麻烦点
+        begin_time:
+          this.searchData.timeName === 'startTime'
+            ? new Date(this.searchData.timeValue).getTime()
+            : undefined,
+        end_time:
+          this.searchData.timeName === 'endTime'
+            ? new Date(this.searchData.timeValue).getTime()
+            : undefined,
+        keyword: this.searchData.taskName === 'taskname' ? this.searchData.taskValue : undefined,
+        account: this.searchData.taskName === 'account' ? this.searchData.taskValue : undefined,
+        task_no: this.searchData.taskName === 'taskId' ? this.searchData.taskValue : undefined,
+        status: this.searchData.taskName === 'taskStatus' ? this.searchData.taskValue : undefined
+      }
+      getTaskList(params)
+        .then(res => {
+          const { list } = res.data
+          this.paginationData.total = res.data.total
+          this.formatData(list)
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    },
+    formatData(list) {
+      // 列表数据格式化
+      this.sendData = []
+      list.forEach((item, index) => {
+        item.begin_time = parseTime(item?.begin_time)
+        item.end_time = parseTime(item?.end_time)
+        item.status = this.taskStatusData.find(i => i.id === item.status)?.name
+        item.order = ++index
+        item.operate = ''
+        this.sendData.push(item)
+      })
     }
   }
 }

@@ -4,6 +4,7 @@
       <el-button type="success" size="small" @click="createAccount">开通账号</el-button>
       <el-button type="success" size="small" @click="handleUse">启用账号</el-button>
       <el-button type="danger" size="small" @click="handleClose">停用账号</el-button>
+      <el-button type="danger" size="small" @click="handleDelete">删除账号</el-button>
       <el-button type="success" size="small" @click="handleSendWay">群发渠道配置</el-button>
       <div class="searchOne">
         <el-select v-model="searchData.seatchItem" size="small">
@@ -37,8 +38,12 @@
           </el-option>
         </el-select>
       </div>
-      <el-button type="primary" size="small" icon="el-icon-search">查询</el-button>
-      <el-button type="normal" size="small" icon="el-icon-refresh-right">重置</el-button>
+      <el-button type="primary" size="small" icon="el-icon-search" @click="handleSearch"
+        >查询</el-button
+      >
+      <el-button type="normal" size="small" icon="el-icon-refresh-right" @click="handleReset"
+        >重置</el-button
+      >
     </div>
     <!-- 表格数据 -->
     <div class="tableWrap">
@@ -95,7 +100,7 @@
 </template>
 <script>
 import Configure from './configure.vue'
-import { getAccountList, getSendWayList, stopAccount, openAccount } from '@/api/manager.js'
+import { getAccountList, stopAccount, openAccount, deleteAccount } from '@/api/manager.js'
 import { parseTime } from '@/utils/index.js'
 export default {
   name: 'custom',
@@ -109,7 +114,7 @@ export default {
       dialogTitle: '群发渠道配置', // 弹框的标题
       dialogVisible: false, // 弹框显示与否
       confirmBtnText: '确认更换', // 弹框确认按钮的文案
-      swList: [], // 群发渠道列表
+      // swList: [], // 群发渠道列表
       searchData: {
         seatchItem: '',
         searchValue: ''
@@ -157,6 +162,11 @@ export default {
       }
     }
   },
+  computed: {
+    swList() {
+      return this.$store.state.swList
+    }
+  },
   mounted() {
     this.initAccountList()
   },
@@ -195,13 +205,48 @@ export default {
       if (this.selectedItems.length <= 0) {
         this.$message.error('请至少选择一项后再停用')
       } else {
-        stopAccount({ uid: this.selectedItems.join(',') })
+        this.$confirm('请再次确认是否停用账号', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
           .then(() => {
-            this.$message.success('停用成功')
-            this.initAccountList()
+            stopAccount({ uid: this.selectedItems.join(',') })
+              .then(() => {
+                this.$message.success('停用成功')
+                this.initAccountList()
+              })
+              .catch(err => {
+                console.log(err)
+              })
           })
-          .catch(err => {
-            console.log(err)
+          .catch(e => {
+            console.log(e)
+          })
+      }
+    },
+    handleDelete() {
+      // 点击删除账号事件
+      if (this.selectedItems.length <= 0) {
+        this.$message.error('请至少选择一项后再停用')
+      } else {
+        this.$confirm('请再次确认是否删除账号', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+          .then(() => {
+            deleteAccount({ uid: this.selectedItems.join(',') })
+              .then(() => {
+                this.$message.success('停用成功')
+                this.initAccountList()
+              })
+              .catch(err => {
+                console.log(err)
+              })
+          })
+          .catch(e => {
+            console.log(e)
           })
       }
     },
@@ -209,8 +254,7 @@ export default {
       // 群发渠道配置弹框
       // 增加个判断，避免每次点击按钮都请求接口
       if (this.swList.length <= 0) {
-        getSendWayList().then(res => {
-          this.swList = res.data
+        this.$store.dispatch('getSwList').then(() => {
           this.dialogVisible = true
           this.dialogTitle = '群发渠道配置'
           this.confirmBtnText = '确认更换'
@@ -242,6 +286,14 @@ export default {
       this.configData.flag = 3
       this.configData.uid = row.uid
     },
+    handleSearch() {
+      // 点击查询按钮事件
+      this.initAccountList()
+    },
+    handleReset() {
+      // 点击重置按钮事件
+      this.searchData = this.$options.data().searchData
+    },
     handleSave() {
       // 点击确定按钮触发事件
       this.$refs.configureRef.handleSubmit()
@@ -249,6 +301,7 @@ export default {
     handleSuccess() {
       // 接口提交成功后触发事件
       this.dialogVisible = false
+      this.initAccountList()
     },
     handleSelectionChange(rows) {
       // 点选了table项触发事件
@@ -277,7 +330,11 @@ export default {
       this.logData = []
       const params = {
         page: this.paginationData.currentPage,
-        'per-page': this.paginationData.pageSize
+        'per-page': this.paginationData.pageSize,
+        keyword: this.searchData.seatchItem === 'account' ? this.searchData.searchValue : undefined,
+        status: this.searchData.seatchItem === 'status' ? this.searchData.searchValue : undefined,
+        remark_search:
+          this.searchData.seatchItem === 'remark' ? this.searchData.searchValue : undefined
       }
       getAccountList(params)
         .then(res => {

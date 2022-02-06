@@ -45,6 +45,15 @@ export const uploadMaterial = data => {
   })
 }
 
+// 补充料子接口
+export const reuploadMaterial = data => {
+  return request({
+    url: '/material/replenish',
+    method: 'POST',
+    data: qs.stringify(data)
+  })
+}
+
 // 群发管理---新建群发任务接口
 export const createTask = data => {
   return request({

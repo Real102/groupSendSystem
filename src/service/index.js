@@ -1,6 +1,6 @@
 import axios from 'axios'
 import router from '@/router'
-import { getToken } from '@/utils/auth'
+import { getToken, setToken } from '@/utils/auth'
 import { Message } from 'element-ui'
 
 // 根据当前环境，设置 baseURL 参数。当 NODE_ENV 为 development 时不需要加前缀，而非 development 环境时需要加前缀
@@ -26,10 +26,9 @@ service.interceptors.request.use(
     config.withCredentials = true
     config.headers = Object.assign(config.headers, {
       // 增加登录token，用于校验登录token是否过期
-      auth: getToken(),
+      token: getToken(),
       'Content-Type': 'application/x-www-form-urlencoded'
     })
-    // config.auth = getToken()
     return config
   },
   err => {
@@ -62,7 +61,7 @@ service.interceptors.response.use(
           })
           throw response.data
         case STATUS_CODE.AUTH_FAIL:
-          console.log(Message)
+          setToken('')
           elMsg({
             message: '登录已过期，请重新登录',
             type: 'error',
