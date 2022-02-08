@@ -20,7 +20,7 @@ export default {
   computed: {
     currentComp() {
       const { role } = this.$store.state.user.userInfo
-      return role === 'custom' ? 'CustomPart' : 'ManagerPart'
+      return role === 1 ? 'CustomPart' : 'ManagerPart'
     }
   },
   mounted() {}

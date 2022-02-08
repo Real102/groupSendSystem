@@ -1,5 +1,5 @@
 <template>
-  <div class="managerPart">managerPart</div>
+  <div class="managerPart">管理员端</div>
 </template>
 <script>
 export default {

@@ -56,7 +56,7 @@ export default {
       switch (dropdownItem.name) {
         case '退出登录':
           setToken('')
-          localStorage.removeItem('role')
+          localStorage.removeItem('userInfo')
           this.$router.push('/login')
           this.$message.success('退出成功')
           break

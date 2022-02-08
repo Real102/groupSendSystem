@@ -5,12 +5,18 @@
         <el-input type="text" size="small" v-model="sendData.task_name"></el-input>
       </el-form-item>
       <el-form-item label="选择料子" prop="material_id">
-        <el-select size="small" v-model="sendData.material_id">
+        <el-select
+          size="small"
+          v-model="sendData.material_id"
+          filterable
+          clearable
+          @change="handleMTChange"
+        >
           <el-option
             v-for="item in materialData"
-            :key="item.value"
-            :label="item.name"
-            :value="item.value"
+            :key="item.id"
+            :label="item.material_name"
+            :value="item.id"
           ></el-option>
         </el-select>
       </el-form-item>
@@ -18,18 +24,12 @@
         <el-input type="text" size="small" v-model="sendData.task_num"></el-input>
       </el-form-item>
       <el-form-item label="料子国家" prop="country">
-        <el-select
-          v-model="sendData.country"
-          placeholder="请选择国家"
-          size="small"
-          disabled
-          filterable
-        >
+        <el-select v-model="sendData.country" placeholder="请选择国家" size="small" disabled>
           <el-option
             v-for="item in mtCountry"
-            :key="item.country_code"
+            :key="item.id"
             :label="item.country_name"
-            :value="item.country_code"
+            :value="item.id"
           >
           </el-option>
         </el-select>
@@ -70,7 +70,9 @@
       </el-form-item>
       <el-form-item label="替换客服号">
         <div class="tmpl">
-          <el-button type="text" style="line-height: 32px; padding: 0">点击复制模板</el-button>
+          <el-button type="text" style="line-height: 32px; padding: 0" @click="handleCopy"
+            >点击复制模板</el-button
+          >
           <p><span>__customerNums__</span> &nbsp;&nbsp;将此代码放入话术中，可平均推动客服号</p>
           <p>
             示例：I am a HR . We are hiring for part/full time job. Now you can earn Rs.9800 every
@@ -103,34 +105,33 @@
       </el-form-item>
       <div class="sendBtn">
         <el-button type="normal" size="small" @click="$router.go(-1)">取消</el-button>
-        <el-button type="primary" size="small" @click="handleCreate">立即创建</el-button>
+        <el-button type="primary" size="small" @click="handleCreate">{{
+          isEdit ? '保存' : '立即创建'
+        }}</el-button>
       </div>
     </el-form>
   </div>
 </template>
 <script>
 import { uploadFile } from '@/api/sign.js'
-import { createTask, calculatePrice } from '@/api/custom.js'
+import { createTask, calculatePrice, getMaterialList } from '@/api/custom.js'
 export default {
   name: 'sendTask',
   data() {
     return {
       fileList: [],
+      isEdit: false,
       sendData: {
         task_name: '',
         material_id: '',
         task_num: '',
-        country: '',
+        country: undefined,
         begin_time: '',
         content: '',
         customer_code: '',
-        image_id: ''
+        image_id: undefined
       },
-      materialData: [
-        { name: '从WA料子中获取', value: 100 },
-        { name: '需要显示剩余的有效数', value: 2 },
-        { name: '美国（有效数1000）', value: 3 }
-      ],
+      materialData: [],
       rule: {
         task_name: [{ required: true, trigger: 'blur', message: '请输入任务名称' }],
         material_id: [{ required: true, trigger: 'blur', message: '请选择料子' }],
@@ -147,11 +148,38 @@ export default {
     }
   },
   beforeRouteEnter(to, from, next) {
-    // const data = localStorage.getItem('sendData')
+    const data = JSON.parse(localStorage.getItem('sendData'))
     // TODO: 数据回显
-    next()
+    next(vm => {
+      vm.initMaterialList()
+      if (data) {
+        Object.assign(vm.sendData, data)
+        vm.isEdit = true
+      } else {
+        vm.isEdit = false
+      }
+    })
   },
   methods: {
+    handleMTChange() {
+      // 选择料子触发事件，自动显示料子国家
+      if (this.sendData.material_id) {
+        const res = this.materialData.find(i => i.id === this.sendData.material_id)
+        this.sendData.country = res?.country_id
+      }
+    },
+    handleCopy() {
+      // 点击复制模板
+      const input = document.createElement('input')
+      document.body.appendChild(input)
+      input.setAttribute('value', '__customerNums__')
+      input.select()
+      if (document.execCommand('copy')) {
+        document.execCommand('copy')
+        this.$message.success('复制成功！')
+      }
+      document.body.removeChild(input)
+    },
     handleBeforeUpload(file) {
       // 上传的文件校验
       const { name } = file
@@ -180,7 +208,9 @@ export default {
       this.$refs.sendFormRef.validate(async valid => {
         if (valid) {
           try {
-            const calres = await calculatePrice(this.sendData)
+            const data = JSON.parse(JSON.stringify(this.sendData))
+            data.begin_time = new Date(data.begin_time).getTime()
+            const calres = await calculatePrice(data)
             const { price } = calres.data
             this.$confirm(
               `当前任务需要消耗【${price}】元，提交后则不能操作停止，请再次确认！`,
@@ -193,7 +223,7 @@ export default {
             )
               .then(() => {
                 // 先计算价格，用户二次确认之后再提交数据
-                createTask(this.sendData).then(() => {
+                createTask(data).then(() => {
                   this.$message.success('创建成功！')
                   this.$router.go(-1)
                 })
@@ -206,6 +236,22 @@ export default {
           }
         }
       })
+    },
+    initMaterialList() {
+      // 初始化料子列表，包括关键字搜索功能
+      const data = {
+        page: 1,
+        'per-page': 1000
+      }
+      getMaterialList(data)
+        .then(res => {
+          this.materialData = []
+          const { list } = res.data
+          this.materialData = list
+        })
+        .catch(err => {
+          console.log(err)
+        })
     }
   }
 }

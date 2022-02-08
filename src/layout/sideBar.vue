@@ -47,6 +47,7 @@ export default {
     },
     role: {
       handler: function () {
+        // 这里是组装导航栏
         resetRouter()
         this.routerData = []
         const endRoutes =
@@ -80,36 +81,8 @@ export default {
   },
   computed: {
     role() {
-      return this.$store.state.role
+      return this.$store.getters.role
     }
-  },
-  mounted() {
-    // this.routerData = []
-    // const endRoutes = managerRoutes.concat(asyncRoutes)
-    // console.log(userRoutes)
-    // endRoutes.forEach(rt => {
-    //   // 处理路由格式，区分只有一个子页面和多个子页面的情况
-    //   // 统一数据格式，便于遍历
-    //   if (!['/404', '*', '/'].includes(rt.path)) {
-    //     if (!rt.meta?.hideSideBar) {
-    //       if (rt.children?.filter(i => !i.meta?.hideSideBar).length > 1) {
-    //         // 这里判断是否有多个子路由，并且子路由都是要显示的
-    //         this.routerData.push({
-    //           path: rt.path,
-    //           meta: rt.meta || {},
-    //           expanded: false,
-    //           children: rt.children
-    //         })
-    //       } else if (rt.children?.filter(i => !i.meta?.hideSideBar).length === 1) {
-    //         const sub = rt.children[0]
-    //         this.routerData.push({
-    //           path: sub.path,
-    //           meta: Object.assign(rt.meta, sub.meta)
-    //         })
-    //       }
-    //     }
-    //   }
-    // })
   },
   methods: {
     handleExpand(path) {

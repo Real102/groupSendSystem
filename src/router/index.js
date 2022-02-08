@@ -24,13 +24,13 @@ export const userRoutes = [
     path: '/material',
     name: 'material',
     component: Layout,
-    meta: { icon: 'icon-material' },
+    meta: { icon: 'icon-material', role: 1 },
     redirect: '/material/index',
     children: [
       {
         path: '/material/index',
         component: () => import(/* webpackChunkName: "material" */ '@/views/material/index.vue'),
-        meta: { title: '料子管理' }
+        meta: { title: '料子管理', role: 1 }
       }
     ]
   },
@@ -38,18 +38,18 @@ export const userRoutes = [
     path: '/send',
     name: 'send',
     component: Layout,
-    meta: { icon: 'icon-send' },
+    meta: { icon: 'icon-send', role: 1 },
     redirect: '/send/index',
     children: [
       {
         path: '/send/index',
         component: () => import(/* webpackChunkName: "send" */ '@/views/send/index.vue'),
-        meta: { title: '群发管理' }
+        meta: { title: '群发管理', role: 1 }
       },
       {
         path: '/send/sendTask',
         component: () => import(/* webpackChunkName: "send" */ '@/views/send/sendTask.vue'),
-        meta: { title: '新建群发任务', hideSideBar: true }
+        meta: { title: '新建群发任务', hideSideBar: true, role: 1 }
       }
     ]
   }
@@ -73,18 +73,18 @@ export const managerRoutes = [
     path: '/custom',
     name: 'custom',
     component: Layout,
-    meta: { icon: 'icon-user-manage' },
+    meta: { icon: 'icon-user-manage', role: 0 },
     redirect: '/custom/index',
     children: [
       {
         path: '/custom/index',
         component: () => import(/* webpackChunkName: "custom" */ '@/views/custom/index.vue'),
-        meta: { title: '用户管理' }
+        meta: { title: '用户管理', role: 0 }
       },
       {
         path: '/custom/createCT',
         component: () => import(/* webpackChunkName: "custom" */ '@/views/custom/createCT.vue'),
-        meta: { title: '开通账号', hideSideBar: true }
+        meta: { title: '开通账号', hideSideBar: true, role: 0 }
       }
     ]
   },
@@ -92,13 +92,13 @@ export const managerRoutes = [
     path: '/country',
     name: 'country',
     component: Layout,
-    meta: { icon: 'icon-country' },
+    meta: { icon: 'icon-country', role: 0 },
     redirect: '/country/index',
     children: [
       {
         path: '/country/index',
         component: () => import(/* webpackChunkName: "country" */ '@/views/country/index.vue'),
-        meta: { title: '群发国家管理' }
+        meta: { title: '群发国家管理', role: 0 }
       }
     ]
   },
@@ -106,13 +106,13 @@ export const managerRoutes = [
     path: '/task',
     name: 'task',
     component: Layout,
-    meta: { icon: 'icon-task' },
+    meta: { icon: 'icon-task', role: 0 },
     redirect: '/task/index',
     children: [
       {
         path: '/task/index',
         component: () => import(/* webpackChunkName: "task" */ '@/views/task/index.vue'),
-        meta: { title: '任务管理' }
+        meta: { title: '任务管理', role: 0 }
       }
     ]
   }
@@ -193,26 +193,17 @@ VueRouter.prototype.push = function push(location) {
 
 const createRouter = () =>
   new VueRouter({
-    scrollBehavior: () => ({ y: 0 })
+    scrollBehavior: () => ({ y: 0 }),
+    routes: managerRoutes.concat([...userRoutes, ...asyncRoutes])
   })
 
 const router = createRouter()
 
 export function resetRouter() {
-  const role = localStorage.getItem('role')
-  console.log('resetRoute：' + role)
   const newRouter = createRouter()
   router.matcher = newRouter.matcher
-  let r = []
-  if (role === 0) {
-    console.log('role = 0 ?')
-    r = managerRoutes.concat(asyncRoutes)
-  } else if (role === 1) {
-    r = userRoutes.concat(asyncRoutes)
-  } else {
-    r = asyncRoutes
-  }
-  r.forEach(i => router.addRoute(i))
+  // const r = managerRoutes.concat([...userRoutes, ...asyncRoutes])
+  // r.forEach(i => router.addRoute(i))
 }
 
 resetRouter()

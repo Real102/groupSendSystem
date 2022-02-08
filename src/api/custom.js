@@ -71,3 +71,12 @@ export const calculatePrice = data => {
     data: qs.stringify(data)
   })
 }
+
+// 群发管理--修改客服号
+export const changeService = data => {
+  return request({
+    url: '/task/change-customer-code',
+    method: 'POST',
+    data: qs.stringify(data)
+  })
+}

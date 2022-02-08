@@ -10,10 +10,9 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     allCountryList: [],
-    swList: [], // 群发渠道列表
+    swList: [] // 群发渠道列表
     // countryList: [],
     // countryListTotal: 0
-    role: 1 // 用户角色
   },
   mutations: {
     SET_ALL_COUNTRY_LIST(state, payload) {
@@ -25,10 +24,10 @@ export default new Vuex.Store({
     // }
     SET_SW_LIST(state, payload) {
       state.swList = payload
-    },
-    SET_ROLE(state, payload) {
-      state.role = payload
     }
+  },
+  getters: {
+    role: state => state.user.userInfo.role
   },
   actions: {
     allCountryList({ commit }) {

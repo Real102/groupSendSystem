@@ -70,8 +70,10 @@ export default {
             .then(res => {
               const { token, role } = res.data
               setToken(token)
-              localStorage.setItem('role', role)
-              this.$store.commit('SET_ROLE', role)
+              // 将用户角色和账号全部交给store来处理，并缓存在本地
+              this.$store.commit('user/SET_USERINFO', { role, account: this.loginData.account })
+              // 初始化所有国家-代码映射表
+              this.$store.dispatch('allCountryList')
               this.$message({
                 message: '登录成功！',
                 type: 'success',

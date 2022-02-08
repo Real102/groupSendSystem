@@ -34,9 +34,9 @@
         <el-table-column type="selection" width="55"> </el-table-column>
         <el-table-column prop="material_name" label="文件名" min-width="200px"></el-table-column>
         <el-table-column prop="country" label="国家"></el-table-column>
-        <el-table-column prop="uploadTimes" label="上传次数"></el-table-column>
-        <el-table-column prop="uploadData" label="上传数据"></el-table-column>
-        <el-table-column prop="validData" label="有效数据"></el-table-column>
+        <el-table-column prop="upload_count" label="上传次数"></el-table-column>
+        <el-table-column prop="all_count" label="上传数据"></el-table-column>
+        <el-table-column prop="effective_count" label="有效数据"></el-table-column>
         <el-table-column
           prop="invalidData"
           label="无效数据（含重复）"
@@ -171,6 +171,7 @@ export default {
       list.forEach((item, index) => {
         item.create_time = parseTime(item.create_time)
         item.id = ++index
+        item.invalidData = item.all_count - item.effective_count
         this.materialData.push(item)
       })
       this.handleSelectionChange()

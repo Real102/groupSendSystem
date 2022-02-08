@@ -1,6 +1,8 @@
 import router from './index.js'
+import store from '@/store/index.js'
 import { getToken } from '@/utils/auth'
 import { MAIN_TITLE } from '@/setting.js'
+import { Message } from 'element-ui'
 
 // 白名单列表，不需要登录即可访问
 const whiteList = ['/login']
@@ -11,12 +13,26 @@ router.beforeEach(async (to, from, next) => {
 
   // 登录token判断
   const hasToken = getToken()
+  const role = store.getters.role
   if (hasToken) {
     if (to.path === '/login') {
       // 不需要重复登录
       next({ path: '/' })
     } else {
-      next()
+      // 由于管理员的role是0，不能只用!判断。
+      // 只有当前的role与路由的role匹配上或role不存在时才能访问
+      if ((!to.meta.role && to.meta.role !== 0) || to.meta.role === role) {
+        next()
+      } else {
+        Message({
+          message: '无权访问！',
+          type: 'error',
+          duration: 2000,
+          onClose: function () {
+            next(from.path)
+          }
+        })
+      }
     }
   } else {
     if (whiteList.indexOf(to.path) !== -1) {
@@ -24,6 +40,5 @@ router.beforeEach(async (to, from, next) => {
     } else {
       next(`/login?redirect=${to.path}`)
     }
-    // next()
   }
 })

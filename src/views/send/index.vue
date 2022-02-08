@@ -25,7 +25,7 @@
           v-if="searchData.taskName !== 'taskStatus'"
         ></el-input>
         <el-select
-          v-model="searchData.taskStatus"
+          v-model="searchData.taskValue"
           placeholder="请选择任务状态"
           size="small"
           clearable
@@ -58,30 +58,39 @@
         >
         </el-date-picker>
       </div>
-      <el-button type="primary" size="small" icon="el-icon-search">查询</el-button>
-      <el-button type="normal" size="small" icon="el-icon-refresh-right">重置</el-button>
+      <el-button type="primary" size="small" icon="el-icon-search" @click="handleSearch"
+        >查询</el-button
+      >
+      <el-button type="normal" size="small" icon="el-icon-refresh-right" @click="handleReset"
+        >重置</el-button
+      >
     </div>
     <!-- 表格展示数据 -->
     <div class="tableWrap">
       <el-table :data="sendData" stripe ref="sendTableRef">
         <el-table-column prop="order" label="序号" width="55"></el-table-column>
-        <el-table-column prop="taskId" label="任务id" min-width="150px"></el-table-column>
-        <el-table-column prop="taskName" label="任务名称"></el-table-column>
-        <el-table-column prop="materialName" label="料子名称"></el-table-column>
+        <el-table-column prop="task_sn" label="任务id" min-width="150px"></el-table-column>
+        <el-table-column prop="task_name" label="任务名称"></el-table-column>
+        <el-table-column prop="material_name" label="料子名称"></el-table-column>
         <el-table-column prop="amount" label="金额（元）"></el-table-column>
-        <el-table-column prop="taskNum" label="任务数（条）"></el-table-column>
-        <el-table-column prop="resolveNum" label="完成数（条）"></el-table-column>
+        <el-table-column prop="task_num" label="任务数（条）"></el-table-column>
+        <el-table-column prop="complete_num" label="完成数（条）"></el-table-column>
         <el-table-column prop="country" label="国家"></el-table-column>
         <el-table-column prop="status" label="状态"></el-table-column>
-        <el-table-column prop="startTime" label="开始时间" min-width="180px"></el-table-column>
-        <el-table-column prop="endTime" label="完成时间" min-width="180px"></el-table-column>
+        <el-table-column prop="begin_time" label="开始时间" min-width="180px"></el-table-column>
+        <el-table-column prop="end_time" label="完成时间" min-width="180px"></el-table-column>
         <el-table-column label="操作" width="200px" fixed="right">
           <template slot-scope="scope">
             <div class="tableBtn">
               <el-button type="primary" size="small" @click="handleShow(scope.row)">
                 查看内容
               </el-button>
-              <el-button type="success" size="small" @click="handleEditService(scope.row)">
+              <el-button
+                type="success"
+                size="small"
+                @click="handleEditService(scope.row)"
+                :disabled="!scope.row.isEditAble"
+              >
                 修改客服号
               </el-button>
             </div>
@@ -117,9 +126,7 @@
     >
       <div>
         <div class="sendDetailDialog" v-if="sendDialogTitle === '群发详情'">
-          这是内容这是内容这是内容这是内容这是内容这是内容这是内容
-          这是内容这是内容这是内容这是内容这是内容这是内容这是内容
-          这是内容这是内容这是内容这是内容这是内容这是内容这是内容
+          {{ err_reason }}
         </div>
         <div class="editPhoneDialog" v-else>
           <el-input type="textarea" v-model="sphone" rows="8" resize="none"></el-input>
@@ -138,19 +145,24 @@
   </div>
 </template>
 <script>
-import { testSendData } from '@/utils/testData.js'
+import { getTaskList } from '@/api/manager.js'
+import { changeService } from '@/api/custom.js'
+import { parseTime } from '@/utils/index.js'
 export default {
   name: 'send',
   data() {
     return {
       sendDialogTitle: '群发详情', // 弹框标题
       sendDialogVisible: false, // 弹框显隐状态
+      err_reason: '', // 当前弹框显示的内容
+      currentId: '', // 当前选中项的id
       sphone: '', // 客服号
+      sendData: [],
       searchData: {
         taskName: 'taskname',
-        taskValue: '',
+        taskValue: undefined,
         timeName: 'startTime',
-        timeValue: ''
+        timeValue: undefined
       },
       taskSearchList: [
         {
@@ -178,19 +190,19 @@ export default {
       ],
       taskStatusData: [
         {
-          id: 1,
+          id: undefined,
           name: '全部'
         },
         {
-          id: 2,
+          id: '0',
           name: '待执行'
         },
         {
-          id: 3,
+          id: '1',
           name: '执行中'
         },
         {
-          id: 4,
+          id: '2',
           name: '已完成'
         }
       ],
@@ -199,31 +211,40 @@ export default {
         currentPage: 1,
         sizes: [10, 30, 50, 100],
         pageSize: 10,
-        total: testSendData.length
+        total: 0
       }
     }
   },
-  computed: {
-    sendData() {
-      return testSendData
-    }
+  mounted() {
+    this.initSendList()
   },
   methods: {
     handleSizeChange(val) {
       this.paginationData.pageSize = val
+      this.initSendList()
     },
     handleCurrentChange(val) {
       this.paginationData.currentPage = val
+      this.initSendList()
     },
-    handleShow() {
+    handleReset() {
+      this.searchData = this.$options.data().searchData
+    },
+    handleSearch() {
+      this.paginationData.currentPage = 1
+      this.initSendList()
+    },
+    handleShow(row) {
       // 点击查看内容按钮
       this.sendDialogVisible = true
       this.sendDialogTitle = '群发详情'
+      this.err_reason = row.err_reason || '暂无内容'
     },
-    handleEditService() {
+    handleEditService(row) {
       // 点击修改客服号按钮
       this.sendDialogVisible = true
       this.sendDialogTitle = '修改客服号'
+      this.currentId = row.id
     },
     handleConfirm() {
       // 弹框点击确定按钮触发
@@ -231,6 +252,19 @@ export default {
       if (this.sendDialogTitle === '修改客服号') {
         // 如果是修改客服号，那么需要在点击确定按钮之后提交客服号信息
         // TODO: 需要对数据格式进行处理
+        const data = {
+          id: this.currentId,
+          customer_code: this.sphone
+        }
+        changeService(data)
+          .then(() => {
+            this.$message.success('修改成功')
+            this.initSendList()
+            this.sendDialogVisible = false
+          })
+          .catch(err => {
+            console.log(err)
+          })
       }
     },
     handleEditTask(row) {
@@ -241,7 +275,50 @@ export default {
       }
       this.$router.push('/send/sendTask')
     },
-    handleExport() {}
+    handleExport() {},
+    initSendList() {
+      // 初始化列表数据
+      const params = {
+        page: this.paginationData.currentPage,
+        'per-page': this.paginationData.pageSize,
+        time_type: this.searchData.timeName === 'startTime' ? 1 : 2,
+        // 字段用的都是同一个，但接口是分开的，所以...略微麻烦点
+        // 这里的时间自动传了NAN，因为timeValue的默认值是undefined，getTime就变成了NAN了。目前接口不影响，暂未修改
+        begin_time:
+          this.searchData.timeName === 'startTime'
+            ? new Date(this.searchData?.timeValue).getTime()
+            : undefined,
+        end_time:
+          this.searchData.timeName === 'endTime'
+            ? new Date(this.searchData?.timeValue).getTime()
+            : undefined,
+        keyword: this.searchData.taskName === 'taskname' ? this.searchData.taskValue : undefined,
+        task_no: this.searchData.taskName === 'taskId' ? this.searchData.taskValue : undefined,
+        status: this.searchData.taskName === 'taskStatus' ? this.searchData.taskValue : undefined
+      }
+      getTaskList(params)
+        .then(res => {
+          const { list } = res.data
+          this.paginationData.total = res.data.total
+          this.formatData(list)
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    },
+    formatData(list) {
+      // 列表数据格式化
+      this.sendData = []
+      list.forEach((item, index) => {
+        item.isEditAble = new Date().getTime() - item.begin_time < 0
+        item.begin_time = parseTime(item?.begin_time)
+        item.end_time = parseTime(item?.end_time)
+        item.status = this.taskStatusData.find(i => i.id === item.status)?.name
+        item.order = ++index
+        item.operate = ''
+        this.sendData.push(item)
+      })
+    }
   }
 }
 </script>
