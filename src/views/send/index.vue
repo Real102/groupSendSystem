@@ -55,6 +55,7 @@
           type="datetime"
           placeholder="选择日期时间"
           size="small"
+          value-format="timestamp"
         >
         </el-date-picker>
       </div>
@@ -79,29 +80,32 @@
         <el-table-column prop="status" label="状态"></el-table-column>
         <el-table-column prop="begin_time" label="开始时间" min-width="180px"></el-table-column>
         <el-table-column prop="end_time" label="完成时间" min-width="180px"></el-table-column>
-        <el-table-column label="操作" width="200px" fixed="right">
+        <el-table-column label="操作" width="210px" fixed="right">
           <template slot-scope="scope">
             <div class="tableBtn">
-              <el-button type="primary" size="small" @click="handleShow(scope.row)">
+              <el-button type="text" size="small" @click="handleShow(scope.row)">
                 查看内容
               </el-button>
               <el-button
-                type="success"
+                type="text"
                 size="small"
                 @click="handleEditService(scope.row)"
                 :disabled="!scope.row.isEditAble"
               >
                 修改客服号
               </el-button>
+              <el-button type="text" size="small" @click="handleExport(scope.row)">
+                导出报表
+              </el-button>
             </div>
-            <div class="tableBtn">
+            <!-- <div class="tableBtn">
               <el-button type="success" size="small" @click="handleEditTask(scope.row)">
                 修改任务
               </el-button>
               <el-button type="success" size="small" @click="handleExport(scope.row)">
                 导出报表
               </el-button>
-            </div>
+            </div> -->
           </template>
         </el-table-column>
       </el-table>
@@ -146,7 +150,7 @@
 </template>
 <script>
 import { getTaskList } from '@/api/manager.js'
-import { changeService } from '@/api/custom.js'
+import { changeService, downloadReport } from '@/api/custom.js'
 import { parseTime } from '@/utils/index.js'
 export default {
   name: 'send',
@@ -275,7 +279,16 @@ export default {
       }
       this.$router.push('/send/sendTask')
     },
-    handleExport() {},
+    handleExport(row) {
+      downloadReport({ id: row.id })
+        .then(res => {
+          const { url } = res.data
+          window.open(url)
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    },
     initSendList() {
       // 初始化列表数据
       const params = {
@@ -286,11 +299,11 @@ export default {
         // 这里的时间自动传了NAN，因为timeValue的默认值是undefined，getTime就变成了NAN了。目前接口不影响，暂未修改
         begin_time:
           this.searchData.timeName === 'startTime'
-            ? new Date(this.searchData?.timeValue).getTime()
+            ? String(this.searchData.timeValue)?.split('').splice(0, 10).join('')
             : undefined,
         end_time:
           this.searchData.timeName === 'endTime'
-            ? new Date(this.searchData?.timeValue).getTime()
+            ? String(this.searchData.timeValue)?.split('').splice(0, 10).join('')
             : undefined,
         keyword: this.searchData.taskName === 'taskname' ? this.searchData.taskValue : undefined,
         task_no: this.searchData.taskName === 'taskId' ? this.searchData.taskValue : undefined,
@@ -363,12 +376,13 @@ export default {
       align-items: center;
       margin: 5px 0;
       .el-button {
-        width: 85px;
+        // width: 85px;
         margin: 0;
-        padding: 9px 10px;
-        &:first-child {
-          margin-right: 10px;
-        }
+        // padding: 9px 10px;
+        padding: 9px 5px !important;
+        // &:first-child {
+        //   margin-right: 10px;
+        // }
       }
     }
   }

@@ -31,11 +31,11 @@
       <div class="scoreWrap" v-else-if="configData.flag === 3">
         <div class="scoreOne">
           <span>账号：</span>
-          <span>66655@qq.com</span>
+          <span>{{ configData.account }}</span>
         </div>
         <div class="scoreOne">
           <span>当前余额：</span>
-          <span>10000</span>
+          <span>{{ configData.balance }}</span>
         </div>
         <div class="scoreOne">
           <span>上分数量：</span>
@@ -71,6 +71,8 @@ export default {
       handler: function () {
         // 初始化备注的信息
         this.remark = this.configData.remark
+        this.score = ''
+        this.scoreStatus = 1
       },
       deep: true
     }

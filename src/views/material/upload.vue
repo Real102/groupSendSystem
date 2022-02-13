@@ -51,7 +51,7 @@ export default {
   props: {
     isUpload: Boolean,
     countryCode: String,
-    uploadId: String
+    uploadId: Number
   },
   data() {
     return {
@@ -78,6 +78,12 @@ export default {
     }
   },
   methods: {
+    initUpload() {
+      // 点击料子上传时，需要初始化一下弹框
+      this.country = ''
+      this.fileList = []
+      this.$refs.uploadRef.clearFiles()
+    },
     handleBeforeUpload(file) {
       // 上传的文件校验
       const { name } = file

@@ -103,7 +103,7 @@ export default {
       uploadTitle: '料子上传', // 弹框的标题
       uploadDialogVisible: false, // 弹框显示与否
       countryCode: '',
-      uploadId: '',
+      uploadId: 0,
       paginationData: {
         // 表单数据
         currentPage: 1,
@@ -168,9 +168,8 @@ export default {
     formatData(list) {
       // 列表数据格式化
       this.materialData = []
-      list.forEach((item, index) => {
+      list.forEach(item => {
         item.create_time = parseTime(item.create_time)
-        item.id = ++index
         item.invalidData = item.all_count - item.effective_count
         this.materialData.push(item)
       })
@@ -188,7 +187,7 @@ export default {
         })
           .then(() => {
             const data = {
-              id: this.selectedItems.join(',')
+              id: this.selectedItems
             }
             deleteMaterial(data)
               .then(() => {
@@ -213,6 +212,9 @@ export default {
         this.countryCode = row.country_id
       } else {
         this.uploadTitle = '料子上传'
+        this.$nextTick(() => {
+          this.$refs.uploadRef.initUpload()
+        })
       }
     },
     handleConfirm() {

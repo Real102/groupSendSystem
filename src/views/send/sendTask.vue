@@ -40,6 +40,7 @@
           type="date"
           placeholder="选择日期"
           size="small"
+          value-format="timestamp"
         >
         </el-date-picker>
       </el-form-item>
@@ -114,7 +115,7 @@
 </template>
 <script>
 import { uploadFile } from '@/api/sign.js'
-import { createTask, calculatePrice, getMaterialList } from '@/api/custom.js'
+import { createTask, calculatePrice, getMaterialList, getSendInfo } from '@/api/custom.js'
 export default {
   name: 'sendTask',
   data() {
@@ -153,7 +154,8 @@ export default {
     next(vm => {
       vm.initMaterialList()
       if (data) {
-        Object.assign(vm.sendData, data)
+        vm.initSendInfo(data.id)
+        // Object.assign(vm.sendData, data)
         vm.isEdit = true
       } else {
         vm.isEdit = false
@@ -209,12 +211,12 @@ export default {
         if (valid) {
           try {
             const data = JSON.parse(JSON.stringify(this.sendData))
-            data.begin_time = new Date(data.begin_time).getTime()
+            data.begin_time = String(data.begin_time)?.split('').splice(0, 10).join('')
             const calres = await calculatePrice(data)
             const { price } = calres.data
             this.$confirm(
               `当前任务需要消耗【${price}】元，提交后则不能操作停止，请再次确认！`,
-              '确认创建群发任务？',
+              `确认${this.isEdit ? '修改' : '创建'}群发任务？`,
               {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
@@ -224,7 +226,7 @@ export default {
               .then(() => {
                 // 先计算价格，用户二次确认之后再提交数据
                 createTask(data).then(() => {
-                  this.$message.success('创建成功！')
+                  this.$message.success(`${this.isEdit ? '修改' : '创建'}成功！`)
                   this.$router.go(-1)
                 })
               })
@@ -236,6 +238,18 @@ export default {
           }
         }
       })
+    },
+    initSendInfo(id) {
+      // 获取信息用于数据回显
+      getSendInfo({ id })
+        .then(res => {
+          // console.log(res)
+          Object.assign(this.sendData, res.data)
+          this.sendData.begin_time = String(this.sendData.begin_time).padEnd(13, 0)
+        })
+        .catch(err => {
+          console.log(err)
+        })
     },
     initMaterialList() {
       // 初始化料子列表，包括关键字搜索功能

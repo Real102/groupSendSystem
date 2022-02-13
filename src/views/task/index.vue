@@ -48,6 +48,7 @@
           type="datetime"
           placeholder="选择日期时间"
           size="small"
+          value-format="timestamp"
         >
         </el-date-picker>
       </div>
@@ -306,11 +307,11 @@ export default {
         // 字段用的都是同一个，但接口是分开的，所以...略微麻烦点
         begin_time:
           this.searchData.timeName === 'startTime'
-            ? new Date(this.searchData.timeValue).getTime()
+            ? String(this.searchData.timeValue)?.split('').splice(0, 10).join('')
             : undefined,
         end_time:
           this.searchData.timeName === 'endTime'
-            ? new Date(this.searchData.timeValue).getTime()
+            ? String(this.searchData.timeValue)?.split('').splice(0, 10).join('')
             : undefined,
         keyword: this.searchData.taskName === 'taskname' ? this.searchData.taskValue : undefined,
         account: this.searchData.taskName === 'account' ? this.searchData.taskValue : undefined,
@@ -333,7 +334,7 @@ export default {
       list.forEach((item, index) => {
         item.begin_time = parseTime(item?.begin_time)
         item.end_time = parseTime(item?.end_time)
-        item.status = this.taskStatusData.find(i => i.id === item.status)?.name
+        item.status = this.taskStatusData.find(i => i.id === parseInt(item.status))?.name
         item.order = ++index
         item.operate = ''
         this.sendData.push(item)

@@ -7,7 +7,7 @@
       <el-button type="danger" size="small" @click="handleDelete">删除账号</el-button>
       <el-button type="success" size="small" @click="handleSendWay">群发渠道配置</el-button>
       <div class="searchOne">
-        <el-select v-model="searchData.seatchItem" size="small">
+        <el-select v-model="searchData.seatchItem" size="small" @change="handleChange">
           <el-option
             v-for="item in searchItemList"
             :key="item.value"
@@ -123,7 +123,9 @@ export default {
         // 传id和类型，这个页面的弹框部分都合并到一个组件中了，需要通过flag来判断
         uid: 1,
         flag: 1,
-        remark: ''
+        remark: '',
+        account: '',
+        balance: ''
       },
       searchItemList: [
         {
@@ -181,6 +183,10 @@ export default {
       this.initAccountList()
       // 如果已选择了table的某项，切换页码或页数的时候需要初始化一下
     },
+    handleChange() {
+      // 点击切换筛选条件时触发
+      this.searchData.searchValue = ''
+    },
     createAccount() {
       // 点击开通账号事件
       this.$router.push('/custom/createCT')
@@ -190,7 +196,7 @@ export default {
       if (this.selectedItems.length <= 0) {
         this.$message.error('请至少选择一项后再启用')
       } else {
-        openAccount({ uid: this.selectedItems.join(',') })
+        openAccount({ uid: this.selectedItems })
           .then(() => {
             this.$message.success('启用成功')
             this.initAccountList()
@@ -211,7 +217,7 @@ export default {
           type: 'warning'
         })
           .then(() => {
-            stopAccount({ uid: this.selectedItems.join(',') })
+            stopAccount({ uid: this.selectedItems })
               .then(() => {
                 this.$message.success('停用成功')
                 this.initAccountList()
@@ -236,7 +242,7 @@ export default {
           type: 'warning'
         })
           .then(() => {
-            deleteAccount({ uid: this.selectedItems.join(',') })
+            deleteAccount({ uid: this.selectedItems })
               .then(() => {
                 this.$message.success('停用成功')
                 this.initAccountList()
@@ -285,6 +291,8 @@ export default {
       this.confirmBtnText = '确定保存'
       this.configData.flag = 3
       this.configData.uid = row.uid
+      this.configData.account = row.account
+      this.configData.balance = row.balance
     },
     handleSearch() {
       // 点击查询按钮事件
@@ -308,10 +316,10 @@ export default {
       // 先清空已选择的数组，然后再遍历push每一项的id
       this.$nextTick(() => {
         if (rows) {
+          this.selectedItems = []
           rows.forEach(row => {
             this.selectedItems.push(row.uid)
           })
-          this.selectedItems = [...new Set(this.selectedItems)]
         } else {
           if (this.selectedItems.length > 0) {
             // 如果没有带rows参数。可以认为是切换页码触发的事件，需要显示之前选择的项

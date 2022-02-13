@@ -23,11 +23,10 @@ const service = axios.create({
 
 service.interceptors.request.use(
   config => {
-    config.withCredentials = true
     config.headers = Object.assign(config.headers, {
       // 增加登录token，用于校验登录token是否过期
-      token: getToken(),
-      'Content-Type': 'application/x-www-form-urlencoded'
+      token: getToken()
+      // 'Content-Type': 'application/x-www-form-urlencoded'
     })
     return config
   },

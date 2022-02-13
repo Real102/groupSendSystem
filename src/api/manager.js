@@ -2,7 +2,7 @@
  * @author wolfBerry
  * @email 906368017@qq.com
  * @create date 2022-01-24 20:45:47
- * @modify date 2022-02-06 18:38:01
+ * @modify date 2022-02-13 15:49:32
  * @desc api接口页面
  */
 
@@ -24,7 +24,7 @@ export const deleteCountry = data => {
   return request({
     url: '/country/del-country',
     method: 'POST',
-    data: qs.stringify(data)
+    data
   })
 }
 
@@ -78,7 +78,7 @@ export const stopAccount = data => {
   return request({
     url: '/account/lock',
     method: 'POST',
-    data: qs.stringify(data)
+    data
   })
 }
 
@@ -87,6 +87,15 @@ export const openAccount = data => {
   return request({
     url: '/account/un-lock',
     method: 'POST',
+    data
+  })
+}
+
+// 账号管理---开通账号
+export const createAccount = data => {
+  return request({
+    url: '/account/open-account',
+    method: 'POST',
     data: qs.stringify(data)
   })
 }
@@ -94,9 +103,9 @@ export const openAccount = data => {
 // 账号管理---删除账号
 export const deleteAccount = data => {
   return request({
-    url: '/account/del-lock',
+    url: 'account/del-account',
     method: 'POST',
-    data: qs.stringify(data)
+    data
   })
 }
 

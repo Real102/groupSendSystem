@@ -35,7 +35,7 @@
           </el-option>
         </el-select>
       </div>
-      <div class="searchOne">
+      <div class="searchOne" v-if="role === 0">
         <span>账号查询：</span>
         <el-input placeholder="请输入账号" v-model="searchData.account" size="small"></el-input>
       </div>
@@ -53,7 +53,7 @@
         <el-table-column prop="order" label="序号" width="55"> </el-table-column>
         <el-table-column prop="taskType" label="业务类型"></el-table-column>
         <!-- TODO: 目标账号仅在管理员账号下可见 -->
-        <el-table-column prop="account" label="目标账号"></el-table-column>
+        <el-table-column prop="account" label="目标账号" v-if="role === 0"></el-table-column>
         <el-table-column prop="amount" label="金额（元）"></el-table-column>
         <el-table-column prop="balance" label="余额（元）"></el-table-column>
         <el-table-column prop="income" label="收入/支出"></el-table-column>
@@ -104,6 +104,11 @@ export default {
         pageSize: 10,
         total: 0
       }
+    }
+  },
+  computed: {
+    role() {
+      return this.$store.state.user.userInfo.role
     }
   },
   mounted() {

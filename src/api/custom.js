@@ -32,7 +32,7 @@ export const deleteMaterial = data => {
   return request({
     url: '/material/delete',
     method: 'POST',
-    data: qs.stringify(data)
+    data
   })
 }
 
@@ -72,11 +72,29 @@ export const calculatePrice = data => {
   })
 }
 
+// 群发管理---点击修改任务获取详情数据
+export const getSendInfo = params => {
+  return request({
+    url: '/task/info',
+    method: 'GET',
+    params
+  })
+}
+
 // 群发管理--修改客服号
 export const changeService = data => {
   return request({
     url: '/task/change-customer-code',
     method: 'POST',
     data: qs.stringify(data)
+  })
+}
+
+// 群发管理--下载报表
+export const downloadReport = params => {
+  return request({
+    url: '/task/get-download-url',
+    method: 'GET',
+    params
   })
 }

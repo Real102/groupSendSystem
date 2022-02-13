@@ -161,7 +161,6 @@ export default {
             this.$refs.countryTableRef.clearSelection()
             this.priceData.forEach(i => {
               if (this.selectedItems.includes(i.id)) {
-                console.log(i)
                 this.$refs.countryTableRef.toggleRowSelection(i)
               }
             })
@@ -208,7 +207,7 @@ export default {
           .then(() => {
             // 二次弹框确认是否要删除国家-价格
             const data = {
-              id: this.selectedItems.join(',')
+              id: this.selectedItems
             }
             deleteCountry(data)
               .then(() => {

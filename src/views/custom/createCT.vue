@@ -43,7 +43,7 @@
         <el-input
           type="textarea"
           size="small"
-          v-model="createData.account"
+          v-model="createData.remark"
           placeholder="请输入内容，最多支持50字"
           maxlength="50"
           show-word-limit
@@ -59,6 +59,7 @@
   </div>
 </template>
 <script>
+import { createAccount } from '@/api/manager.js'
 export default {
   name: 'createCT',
   data() {
@@ -66,7 +67,7 @@ export default {
       createData: {
         account: '',
         pwd: '',
-        rePwd: '',
+        repwd: '',
         num: 0,
         remark: ''
       },
@@ -77,12 +78,31 @@ export default {
       }
     }
   },
+  beforeRouterEnter(to, from, next) {
+    next(vm => {
+      vm.createData = vm.$otions.data().createData
+    })
+  },
   methods: {
     handleClick() {
       // 点击立即开通事件
       this.$refs.createFormRef.validate(valid => {
         if (valid) {
           // 校验通过
+          const data = {
+            account: this.createData.account,
+            password: this.createData.pwd,
+            score: this.createData.num,
+            remark: this.createData.remark
+          }
+          createAccount(data)
+            .then(() => {
+              this.$message.success('开通成功')
+              this.$router.go(-1)
+            })
+            .catch(err => {
+              console.log(err)
+            })
         }
       })
     },
@@ -104,7 +124,7 @@ export default {
     repwdValid(rule, value, cb) {
       if (!value) {
         return cb(new Error('请输入确认密码'))
-      } else if (value !== this.registData.password) {
+      } else if (value !== this.createData.pwd) {
         return cb(new Error('两次密码输入不一致'))
       } else {
         return cb()
