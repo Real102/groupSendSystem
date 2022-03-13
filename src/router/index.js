@@ -10,6 +10,7 @@ export const userRoutes = [
   {
     // 方便起见，直接前后台都搞一个home路由
     path: '/home',
+    name: 'customHome',
     component: Layout,
     meta: { title: '首页', icon: 'icon-home' },
     children: [
@@ -20,20 +21,20 @@ export const userRoutes = [
       }
     ]
   },
-  {
-    path: '/material',
-    name: 'material',
-    component: Layout,
-    meta: { icon: 'icon-material', role: 1 },
-    redirect: '/material/index',
-    children: [
-      {
-        path: '/material/index',
-        component: () => import(/* webpackChunkName: "material" */ '@/views/material/index.vue'),
-        meta: { title: '料子管理', role: 1 }
-      }
-    ]
-  },
+  // {
+  //   path: '/material',
+  //   name: 'material',
+  //   component: Layout,
+  //   meta: { icon: 'icon-material', role: 1 },
+  //   redirect: '/material/index',
+  //   children: [
+  //     {
+  //       path: '/material/index',
+  //       component: () => import(/* webpackChunkName: "material" */ '@/views/material/index.vue'),
+  //       meta: { title: '料子管理', role: 1 }
+  //     }
+  //   ]
+  // },
   {
     path: '/send',
     name: 'send',
@@ -52,6 +53,20 @@ export const userRoutes = [
         meta: { title: '新建群发任务', hideSideBar: true, role: 1 }
       }
     ]
+  },
+  {
+    path: '/log',
+    name: 'customLog',
+    component: Layout,
+    meta: { icon: 'icon-log' },
+    redirect: '/log/index',
+    children: [
+      {
+        path: '/log/index',
+        component: () => import(/* webpackChunkName: "log" */ '@/views/log/index.vue'),
+        meta: { title: '消费日志' }
+      }
+    ]
   }
 ]
 
@@ -59,6 +74,7 @@ export const managerRoutes = [
   // 后台页面
   {
     path: '/home',
+    name: 'systemHome',
     component: Layout,
     meta: { title: '首页', icon: 'icon-home' },
     children: [
@@ -115,14 +131,10 @@ export const managerRoutes = [
         meta: { title: '任务管理', role: 0 }
       }
     ]
-  }
-]
-
-export const asyncRoutes = [
-  // 公共页面
+  },
   {
     path: '/log',
-    name: 'log',
+    name: 'systemLog',
     component: Layout,
     meta: { icon: 'icon-log' },
     redirect: '/log/index',
@@ -130,10 +142,28 @@ export const asyncRoutes = [
       {
         path: '/log/index',
         component: () => import(/* webpackChunkName: "log" */ '@/views/log/index.vue'),
-        meta: { title: '操作日志' }
+        meta: { title: '消费日志' }
       }
     ]
   },
+  {
+    path: '/system',
+    name: 'system',
+    component: Layout,
+    meta: { icon: 'icon-system', role: 0 },
+    redirect: '/system/index',
+    children: [
+      {
+        path: '/system/index',
+        component: () => import(/* webpackChunkName: "system" */ '@/views/system/index.vue'),
+        meta: { title: '系统设置', role: 0 }
+      }
+    ]
+  }
+]
+
+export const asyncRoutes = [
+  // 公共页面
   {
     path: '/personal',
     name: 'personal',

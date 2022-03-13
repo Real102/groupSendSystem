@@ -62,7 +62,7 @@
         <el-table-column label="操作" min-width="150px">
           <template slot-scope="scope">
             <el-button type="primary" size="small" @click="handleEdit(scope.row)">编辑</el-button>
-            <el-button type="primary" size="small" @click="handleClick(scope.row)">上分</el-button>
+            <el-button type="primary" size="small" @click="handleClick(scope.row)">充值</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -285,9 +285,9 @@ export default {
       this.configData.remark = row.remark
     },
     handleClick(row) {
-      // 点击上分按钮事件
+      // 点击充值按钮事件
       this.dialogVisible = true
-      this.dialogTitle = '上分设置'
+      this.dialogTitle = '充值设置'
       this.confirmBtnText = '确定保存'
       this.configData.flag = 3
       this.configData.uid = row.uid

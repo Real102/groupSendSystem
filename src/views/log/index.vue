@@ -2,10 +2,10 @@
   <div class="log">
     <div class="searchWrap">
       <div class="searchOne">
-        <span>业务类型：</span>
+        <span>消费类型：</span>
         <el-select
           v-model="searchData.taskType"
-          placeholder="请选择业务类型"
+          placeholder="请选择消费类型"
           size="small"
           clearable
         >
@@ -19,10 +19,10 @@
         </el-select>
       </div>
       <div class="searchOne">
-        <span>业务状态：</span>
+        <span>消费状态：</span>
         <el-select
           v-model="searchData.taskStatus"
-          placeholder="请选择业务状态"
+          placeholder="请选择消费状态"
           size="small"
           clearable
         >
@@ -51,7 +51,7 @@
     <div class="tableWrap">
       <el-table :data="logData" stripe ref="logTableRef">
         <el-table-column prop="order" label="序号" width="55"> </el-table-column>
-        <el-table-column prop="taskType" label="业务类型"></el-table-column>
+        <el-table-column prop="taskType" label="消费类型"></el-table-column>
         <!-- TODO: 目标账号仅在管理员账号下可见 -->
         <el-table-column prop="account" label="目标账号" v-if="role === 0"></el-table-column>
         <el-table-column prop="amount" label="金额（元）"></el-table-column>

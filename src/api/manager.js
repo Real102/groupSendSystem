@@ -2,7 +2,7 @@
  * @author wolfBerry
  * @email 906368017@qq.com
  * @create date 2022-01-24 20:45:47
- * @modify date 2022-02-13 15:49:32
+ * @modify date 2022-03-13 20:22:11
  * @desc api接口页面
  */
 
@@ -64,7 +64,7 @@ export const editRemark = data => {
   })
 }
 
-// 账号管理---上分接口
+// 账号管理---充值接口
 export const setScore = data => {
   return request({
     url: '/account/add-balance',
@@ -115,5 +115,32 @@ export const getTaskList = params => {
     url: '/task',
     method: 'GET',
     params
+  })
+}
+
+// 系统设置--获取赠送金额列表
+export const getZSList = params => {
+  return request({
+    url: '/account/get-give',
+    method: 'GET',
+    params
+  })
+}
+
+// 系统设置--删除赠送金额接口
+export const deleteZSItem = data => {
+  return request({
+    url: '/account/del-give',
+    method: 'POST',
+    data
+  })
+}
+
+// 系统设置--删除赠送金额接口
+export const addZSItem = data => {
+  return request({
+    url: '/account/give-setting',
+    method: 'POST',
+    data
   })
 }

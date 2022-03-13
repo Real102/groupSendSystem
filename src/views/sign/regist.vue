@@ -62,6 +62,7 @@
 </template>
 <script>
 import { getRegist, getCaptcha } from '@/api/sign.js'
+import { setToken } from '@/utils/auth'
 export default {
   name: 'regist',
   data() {
@@ -128,13 +129,19 @@ export default {
             password: this.registData.password,
             code: this.registData.code
           })
-            .then(() => {
+            .then(res => {
+              // 登录成功后自动跳转到首页
+              setToken(res.data.token)
+              // 将用户角色和账号全部交给store来处理，并缓存在本地
+              this.$store.commit('user/SET_USERINFO', { role: 1, account: this.registData.account })
+              // 初始化所有国家-代码映射表
+              this.$store.dispatch('allCountryList')
               this.$message({
                 message: '注册成功！',
                 type: 'success',
                 duration: 2000,
-                onClose: function () {
-                  this.$router.push('/login')
+                onClose: () => {
+                  this.$router.push('/')
                 }
               })
             })
@@ -176,7 +183,8 @@ export default {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: @main-maybe-bg-color;
+  background: url('~@/assets/bg.png') no-repeat;
+  background-size: cover;
   .regist-form {
     width: 360px;
     height: 500px;

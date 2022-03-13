@@ -36,8 +36,11 @@
           placeholder="请确认密码"
         ></el-input>
       </el-form-item>
-      <el-form-item label="上分数量" style="text-align: left">
+      <el-form-item label="充值USDT" style="text-align: left">
         <el-input-number v-model="createData.num" :step="1" step-strictly></el-input-number>
+      </el-form-item>
+      <el-form-item label="汇率" style="text-align: left" prop="rate">
+        <el-input v-model="createData.rate" size="small" type="text"></el-input>
       </el-form-item>
       <el-form-item label="备注">
         <el-input
@@ -69,10 +72,12 @@ export default {
         pwd: '',
         repwd: '',
         num: 0,
-        remark: ''
+        remark: '',
+        rate: 0
       },
       rule: {
         account: [{ required: true, trigger: 'blur', validator: this.accountValid }],
+        rate: [{ required: true, trigger: 'blur', validator: this.rateValid }],
         pwd: [{ required: true, trigger: 'blur', validator: this.pwdValid }],
         repwd: [{ required: true, trigger: 'blur', validator: this.repwdValid }]
       }
@@ -93,7 +98,8 @@ export default {
             account: this.createData.account,
             password: this.createData.pwd,
             score: this.createData.num,
-            remark: this.createData.remark
+            remark: this.createData.remark,
+            rate: this.createData.rate
           }
           createAccount(data)
             .then(() => {
@@ -110,6 +116,13 @@ export default {
       const EMail = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/
       if (!value.match(EMail)) {
         return cb(new Error('请输入正确格式的电子邮箱账号'))
+      } else {
+        return cb()
+      }
+    },
+    rateValid(rule, value, cb) {
+      if (!value || value === 0) {
+        return cb(new Error('请输入汇率'))
       } else {
         return cb()
       }

@@ -62,6 +62,7 @@
 </template>
 <script>
 import { getReset, getCaptcha } from '@/api/sign.js'
+import { setToken } from '@/utils/auth'
 export default {
   name: 'forget',
   data() {
@@ -130,14 +131,23 @@ export default {
             password: this.forgetData.password,
             code: this.forgetData.code
           })
-            .then(() => {
+            .then(res => {
+              // 登录成功后自动跳转到首页
+              setToken(res.data.token)
+              // 将用户角色和账号全部交给store来处理，并缓存在本地
+              this.$store.commit('user/SET_USERINFO', {
+                role: res.data.role || 1,
+                account: this.forgetData.account
+              })
+              // 初始化所有国家-代码映射表
+              this.$store.dispatch('allCountryList')
               this.$message({
                 type: 'success',
                 message: '密码修改成功',
                 duration: 2000,
-                onClose: function () {
-                  // 跳转到登录页，重新登录
-                  this.$router.push('/login')
+                onClose: () => {
+                  // 跳转到首页，不需要重新登录
+                  this.$router.push('/')
                 }
               })
             })
@@ -179,7 +189,8 @@ export default {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: @main-maybe-bg-color;
+  background: url('~@/assets/bg.png') no-repeat;
+  background-size: cover;
   .forget-form {
     width: 360px;
     height: 500px;

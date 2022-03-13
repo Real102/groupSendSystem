@@ -71,8 +71,8 @@
       <el-table :data="sendData" stripe ref="sendTableRef">
         <el-table-column prop="order" label="序号" width="55"></el-table-column>
         <el-table-column prop="task_sn" label="任务id" min-width="150px"></el-table-column>
-        <el-table-column prop="task_name" label="任务名称"></el-table-column>
-        <el-table-column prop="material_name" label="料子名称"></el-table-column>
+        <el-table-column prop="task_name" label="任务名"></el-table-column>
+        <!-- <el-table-column prop="material_name" label="料子名称"></el-table-column> -->
         <el-table-column prop="amount" label="金额（元）"></el-table-column>
         <el-table-column prop="task_num" label="任务数（条）"></el-table-column>
         <el-table-column prop="complete_num" label="完成数（条）"></el-table-column>
@@ -170,7 +170,7 @@ export default {
       },
       taskSearchList: [
         {
-          name: '任务名称',
+          name: '任务名',
           value: 'taskname'
         },
         {

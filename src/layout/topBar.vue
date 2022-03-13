@@ -3,7 +3,7 @@
 <template>
   <header class="topBar">
     <div class="menu-top" @click="openPage">
-      <span>{{ title }}</span>
+      <img src="@/assets/logo.png" alt="" />
     </div>
     <el-dropdown @command="handleDropdownCommand">
       <div class="user" v-show="userName">
@@ -25,7 +25,6 @@
 </template>
 
 <script>
-import { MAIN_TITLE } from '@/setting.js'
 import { setToken } from '@/utils/auth.js'
 
 export default {
@@ -43,9 +42,6 @@ export default {
     }
   },
   computed: {
-    title() {
-      return MAIN_TITLE
-    },
     userName() {
       return this.$store.state.user.userInfo.name || 'admin'
     }
@@ -97,6 +93,10 @@ export default {
     align-items: center;
     background: @sideBar-title-bgcolor;
     cursor: pointer;
+    img {
+      display: block;
+      height: 40px;
+    }
   }
   .nav-logo {
     display: flex;
@@ -122,6 +122,9 @@ export default {
     &-name {
       margin: 0 8px 0 4px;
       font-size: 14px;
+    }
+    & > i:first-child {
+      margin-right: 8px;
     }
   }
 }

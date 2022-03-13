@@ -70,8 +70,9 @@ export default {
       }
       setPwd(data)
         .then(() => {
-          // TODO: 修改完密码后删除token，然后再自动跳转到登录页面
           this.$message.success('修改成功')
+          localStorage.removeItem('token')
+          this.$router.push('/login')
         })
         .catch(err => {
           console.log(err)

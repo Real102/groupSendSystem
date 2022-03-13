@@ -112,7 +112,8 @@ export default {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: @main-maybe-bg-color;
+  background: url('~@/assets/bg.png') no-repeat;
+  background-size: cover;
   .login-form {
     width: 360px;
     height: 400px;

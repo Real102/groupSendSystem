@@ -1,10 +1,10 @@
 <template>
   <div class="sendTask">
     <el-form class="sendWrap" ref="sendFormRef" :model="sendData" :rules="rule" label-width="100px">
-      <el-form-item label="任务名称" prop="task_name">
+      <el-form-item label="任务名" prop="task_name">
         <el-input type="text" size="small" v-model="sendData.task_name"></el-input>
       </el-form-item>
-      <el-form-item label="选择料子" prop="material_id">
+      <!-- <el-form-item label="选择料子" prop="material_id">
         <el-select
           size="small"
           v-model="sendData.material_id"
@@ -19,12 +19,12 @@
             :value="item.id"
           ></el-option>
         </el-select>
-      </el-form-item>
-      <el-form-item label="发送条数" prop="task_num">
+      </el-form-item> -->
+      <!-- <el-form-item label="发送条数" prop="task_num">
         <el-input type="text" size="small" v-model="sendData.task_num"></el-input>
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="料子国家" prop="country">
-        <el-select v-model="sendData.country" placeholder="请选择国家" size="small" disabled>
+        <el-select v-model="sendData.country" placeholder="请选择国家" size="small">
           <el-option
             v-for="item in mtCountry"
             :key="item.id"
@@ -44,7 +44,29 @@
         >
         </el-date-picker>
       </el-form-item>
-      <el-form-item label="上传图片">
+      <el-form-item label="上传料子" class="mt-item">
+        <el-upload
+          class="uploadWrap"
+          ref="uploadRef"
+          action=""
+          :before-upload="handleBeforeUpload"
+          :file-list="fileList"
+          :http-request="handleUpload"
+          :limit="1"
+        >
+          <el-button size="small" type="primary"
+            >上传<i class="el-icon-upload el-icon--right"></i
+          ></el-button>
+          <label v-show="sendData.material_num"
+            >去重后剩余：<span>{{ sendData.material_num }}</span
+            >条</label
+          >
+        </el-upload>
+        <p>
+          上次料子前需要选择料子国家，群发收费根据上传料子的条数收费，请确保料子是有效的(已开通ws)！
+        </p>
+      </el-form-item>
+      <!-- <el-form-item label="上传图片">
         <el-upload
           class="uploadWrap"
           ref="uploadRef"
@@ -57,8 +79,8 @@
           <el-button size="small" type="primary">点击上传</el-button>
           <span style="margin-left: 10px; color: red">0.02/条</span>
         </el-upload>
-      </el-form-item>
-      <el-form-item label="发送内容" prop="content">
+      </el-form-item> -->
+      <el-form-item label="群发文案" prop="content">
         <el-input
           type="textarea"
           v-model="sendData.content"
@@ -71,15 +93,18 @@
       </el-form-item>
       <el-form-item label="替换客服号">
         <div class="tmpl">
-          <el-button type="text" style="line-height: 32px; padding: 0" @click="handleCopy"
-            >点击复制模板</el-button
-          >
           <p><span>__customerNums__</span> &nbsp;&nbsp;将此代码放入话术中，可平均推动客服号</p>
           <p>
             示例：I am a HR . We are hiring for part/full time job. Now you can earn Rs.9800 every
             day. Add ws: __customerNums__
+            <el-button
+              type="text"
+              style="line-height: 32px; padding: 0; margin-left: 10px"
+              @click="handleCopy"
+              >点击复制模板</el-button
+            >
           </p>
-          <p>推送效果：</p>
+          <!-- <p>推送效果：</p>
           <p>
             I am a HR . We are hiring for part/full time job. Now you can earn Rs.9800 every day.
             Add ws: https://wa.me/客服号1
@@ -92,7 +117,7 @@
             I am a HR . We are hiring for part/full time job. Now you can earn Rs.9800 every day.
             Add ws: https://wa.me/客服号1
           </p>
-          <p>....</p>
+          <p>....</p> -->
         </div>
       </el-form-item>
       <el-form-item label="ws客服号">
@@ -124,22 +149,24 @@ export default {
       isEdit: false,
       sendData: {
         task_name: '',
-        material_id: '',
-        task_num: '',
+        // material_id: '',
+        material_num: '100', // 去重后的料子数量
+        // task_num: '',
         country: undefined,
         begin_time: '',
         content: '',
         customer_code: '',
-        image_id: undefined
+        // image_id: undefined,
+        file_id: ''
       },
       materialData: [],
       rule: {
-        task_name: [{ required: true, trigger: 'blur', message: '请输入任务名称' }],
-        material_id: [{ required: true, trigger: 'blur', message: '请选择料子' }],
-        task_num: [{ required: true, trigger: 'blur', message: '请输入发送条数' }],
+        task_name: [{ required: true, trigger: 'blur', message: '请输入任务名' }],
+        // material_id: [{ required: true, trigger: 'blur', message: '请选择料子' }],
+        // task_num: [{ required: true, trigger: 'blur', message: '请输入发送条数' }],
         country: [{ required: true, trigger: 'blur', message: '请选择料子国家' }],
         begin_time: [{ required: true, trigger: 'blur', message: '请选择发送时间' }],
-        content: [{ required: true, trigger: 'blur', message: '请输入发送内容' }]
+        content: [{ required: true, trigger: 'blur', message: '请输入群发文案' }]
       }
     }
   },
@@ -153,6 +180,7 @@ export default {
     // TODO: 数据回显
     next(vm => {
       vm.initMaterialList()
+      vm.initUpload()
       if (data) {
         vm.initSendInfo(data.id)
         // Object.assign(vm.sendData, data)
@@ -182,11 +210,16 @@ export default {
       }
       document.body.removeChild(input)
     },
+    initUpload() {
+      // 点击料子上传时，需要初始化一下弹框
+      this.fileList = []
+      this.$refs.uploadRef.clearFiles()
+    },
     handleBeforeUpload(file) {
       // 上传的文件校验
       const { name } = file
-      if (['png', 'jpg', 'jpeg'].every(i => name.indexOf(i) < -1)) {
-        this.$message.warning('请上传png，jpg，jpeg格式图片')
+      if (!name.endsWith('.txt')) {
+        this.$message.warning('请上传txt格式文件')
         return false
       }
     },
@@ -195,17 +228,41 @@ export default {
       const { file } = e
       const formData = new FormData()
       formData.append('file', file)
-      formData.append('type', 0)
+      formData.append('type', 1)
       uploadFile(formData)
         .then(res => {
           this.$message.success('上传成功')
-          this.sendData.image_id = res.data.file_id
+          this.sendData.file_id = res.data.file_id
         })
         .catch(err => {
           console.log(err)
           this.$refs.uploadRef.clearFiles()
         })
     },
+    // handleBeforeUpload(file) {
+    //   // 上传的文件校验
+    //   const { name } = file
+    //   if (['png', 'jpg', 'jpeg'].every(i => name.indexOf(i) < -1)) {
+    //     this.$message.warning('请上传png，jpg，jpeg格式图片')
+    //     return false
+    //   }
+    // },
+    // handleUpload(e) {
+    //   // 自定义上传逻辑
+    //   const { file } = e
+    //   const formData = new FormData()
+    //   formData.append('file', file)
+    //   formData.append('type', 0)
+    //   uploadFile(formData)
+    //     .then(res => {
+    //       this.$message.success('上传成功')
+    //       this.sendData.image_id = res.data.file_id
+    //     })
+    //     .catch(err => {
+    //       console.log(err)
+    //       this.$refs.uploadRef.clearFiles()
+    //     })
+    // },
     handleCreate() {
       this.$refs.sendFormRef.validate(async valid => {
         if (valid) {
@@ -296,19 +353,35 @@ export default {
         padding-right: 20px;
       }
       &:nth-child(7),
-      &:nth-child(8),
-      &:nth-child(9) {
+      &:nth-child(5),
+      &:nth-child(6) {
         width: 100%;
       }
       .tmpl {
         text-align: left;
         p {
-          line-height: 24px;
+          line-height: 40px;
           span {
             color: red;
             font-weight: 600;
           }
         }
+      }
+    }
+    .mt-item {
+      label {
+        color: rgba(16, 16, 16, 100);
+        font-size: 14px;
+        margin-left: 20px;
+        span {
+          color: #e82020;
+          margin-right: 8px;
+        }
+      }
+      p {
+        font-size: 14px;
+        line-height: 24px;
+        color: #e82020;
       }
     }
     .sendBtn {

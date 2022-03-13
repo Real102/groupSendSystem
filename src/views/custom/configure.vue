@@ -38,7 +38,7 @@
           <span>{{ configData.balance }}</span>
         </div>
         <div class="scoreOne">
-          <span>上分数量：</span>
+          <span>充值USDT：</span>
           <el-radio-group v-model="scoreStatus">
             <el-radio :label="1">增加</el-radio>
             <el-radio :label="0">减少</el-radio>
@@ -47,6 +47,10 @@
         <div class="scoreOne">
           <span></span>
           <el-input-number v-model="score" :step="1" step-strictly></el-input-number>
+        </div>
+        <div class="scoreOne">
+          <span>汇率：</span>
+          <el-input type="text" size="small" v-model="rate"></el-input>
         </div>
       </div>
     </div>
@@ -82,7 +86,8 @@ export default {
       sw: 1,
       remark: '',
       scoreStatus: 1,
-      score: ''
+      score: '',
+      rate: 0
     }
   },
   methods: {
@@ -115,19 +120,26 @@ export default {
             console.log(err)
           })
       } else if (this.configData.flag === 3) {
-        const data = {
-          uid: this.configData.uid,
-          score: this.score,
-          type: this.scoreStatus
+        if (!this.score || this.score === 0) {
+          this.$message.warning('请输入充值USDT')
+        } else if (!this.rate || this.rate === 0) {
+          this.$message.warning('请输入汇率')
+        } else {
+          const data = {
+            uid: this.configData.uid,
+            score: this.score,
+            type: this.scoreStatus,
+            rate: this.rate
+          }
+          setScore(data)
+            .then(() => {
+              this.$message.success('充值成功！')
+              this.$emit('submitSuccess')
+            })
+            .catch(err => {
+              console.log(err)
+            })
         }
-        setScore(data)
-          .then(() => {
-            this.$message.success('上分成功！')
-            this.$emit('submitSuccess')
-          })
-          .catch(err => {
-            console.log(err)
-          })
       }
     }
   }
