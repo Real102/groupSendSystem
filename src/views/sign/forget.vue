@@ -2,6 +2,7 @@
   <div class="forget">
     <div class="forget-form">
       <div class="title-con">
+        <label class="login-btn" @click="$router.push('/login')">← 去登录</label>
         <span>忘记密码</span>
       </div>
       <el-form :model="forgetData" class="forgetForm" ref="forgetFormRef" :rules="rule">
@@ -53,10 +54,6 @@
           确&nbsp;&nbsp;&nbsp;&nbsp;认
         </el-button>
       </el-form>
-      <div class="other-part">
-        <p>已有账号？去<span @click="$router.push('/login')">登录</span></p>
-        <p>没有账号？去<span @click="$router.push('/regist')">注册</span></p>
-      </div>
     </div>
   </div>
 </template>
@@ -193,11 +190,11 @@ export default {
   background-size: cover;
   .forget-form {
     width: 360px;
-    height: 500px;
+    height: 450px;
     margin: 15vh auto 0 auto;
-    background: #fff;
+    background: rgba(49, 60, 69, 0.5);
     border-radius: 4px;
-    box-shadow: 0 0 10px rgba(#fff, 0.5);
+    box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.2);
     position: relative;
     padding: 0 30px;
     box-sizing: border-box;
@@ -206,13 +203,18 @@ export default {
       height: 100px;
       box-sizing: border-box;
       position: relative;
-      &:after {
-        content: '';
+      .login-btn {
         position: absolute;
-        bottom: 35px;
+        top: 0;
         left: 0;
-        width: 100%;
-        border-bottom: 1px solid #dcdcdc;
+        width: 100px;
+        height: 48px;
+        line-height: 48px;
+        font-size: 12px;
+        margin-left: -20px;
+        cursor: pointer;
+        color: #11df4e;
+        text-align: left;
       }
       span {
         position: absolute;
@@ -223,13 +225,20 @@ export default {
         height: 30px;
         text-align: center;
         font-size: 18px;
-        color: #101010;
+        color: #fff;
         display: block;
-        background: #fff;
         z-index: 2;
         font-weight: 600;
         letter-spacing: 2px;
         text-indent: 2px;
+      }
+    }
+    .el-form-item {
+      .el-input {
+        /deep/.el-input__inner {
+          color: #aaa;
+          background: #e8f0fe;
+        }
       }
     }
     /deep/.codeItem {
@@ -240,7 +249,6 @@ export default {
       }
       .el-button {
         margin-left: 20px;
-        background: @link-color;
         width: 120px;
         flex-shrink: 0;
       }
@@ -250,32 +258,17 @@ export default {
     }
     .el-button {
       width: 100%;
-      background: @link-color;
+      background: #175070;
       border: none;
+      border-radius: 0;
       font-size: 16px;
+    }
+    .el-button.is-disabled {
+      background: #175070 !important;
     }
     /deep/.el-input__prefix {
       // 验证码icon的样式
       width: 25px;
-    }
-  }
-  .other-part {
-    position: absolute;
-    bottom: 15px;
-    width: 100%;
-    left: 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 30px;
-    box-sizing: border-box;
-    p {
-      font-size: 14px;
-      cursor: pointer;
-      span {
-        color: @link-color;
-        cursor: pointer;
-      }
     }
   }
 }

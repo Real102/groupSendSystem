@@ -8,6 +8,7 @@ import store from './store'
 // import '@/plugins/element-ui'
 // css
 import './styles/reset.less'
+import './styles/elementui.less'
 import './styles/_variables.less'
 import './styles/global.less'
 import './styles/sprite/sprite.less'

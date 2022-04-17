@@ -34,8 +34,8 @@
         >
       </el-form>
       <div class="other-part">
-        <p @click="$router.push('/forget')">忘记密码</p>
-        <p>没有账号？去<span @click="$router.push('/regist')">注册</span></p>
+        <p @click="$router.push('/forget')">密码找回</p>
+        <p @click="$router.push('/regist')">去注册 →</p>
       </div>
     </div>
   </div>
@@ -118,15 +118,15 @@ export default {
     width: 360px;
     height: 400px;
     margin: 20vh auto 0 auto;
-    background: #fff;
+    background: rgba(49, 60, 69, 0.5);
     border-radius: 4px;
-    box-shadow: 0 0 10px rgba(#fff, 0.5);
     position: relative;
+    box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.2);
     h2 {
       width: 100%;
       line-height: 90px;
       text-align: center;
-      color: @l-fontcolor;
+      color: #fff;
       font-weight: 600;
       font-size: 24px;
       letter-spacing: 2px;
@@ -138,7 +138,10 @@ export default {
         margin-bottom: 30px;
         .el-input {
           font-size: 14px;
-          color: @l-fontcolor;
+          /deep/.el-input__inner {
+            color: #aaa;
+            background: #e8f0fe;
+          }
           /deep/.el-input__icon {
             font-size: 16px;
           }
@@ -146,8 +149,9 @@ export default {
       }
       .el-button {
         width: 100%;
-        background: @link-color;
+        background: #175070;
         border: none;
+        border-radius: 0;
         font-size: 16px;
       }
     }
@@ -163,11 +167,10 @@ export default {
       box-sizing: border-box;
       p {
         font-size: 14px;
-        color: @l-fontcolor;
-        &:first-child,
-        span {
-          color: @link-color;
-          cursor: pointer;
+        color: #11df4e;
+        cursor: pointer;
+        &:first-child {
+          color: #df1111;
         }
       }
     }

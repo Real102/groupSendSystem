@@ -24,7 +24,7 @@
         <el-input type="text" size="small" v-model="sendData.task_num"></el-input>
       </el-form-item> -->
       <el-form-item label="料子国家" prop="country">
-        <el-select v-model="sendData.country" placeholder="请选择国家" size="small">
+        <el-select v-model="sendData.country" placeholder="请选择国家" size="small" filterable>
           <el-option
             v-for="item in mtCountry"
             :key="item.id"

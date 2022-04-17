@@ -12,10 +12,12 @@ export default {
       this.$store.dispatch('allCountryList')
     }
     const { name, role } = JSON.parse(localStorage.getItem('userInfo'))
-    this.$store.commit('user/SET_USERINFO', {
-      account: name,
-      role
-    })
+    if (name) {
+      this.$store.commit('user/SET_USERINFO', {
+        account: name,
+        role
+      })
+    }
   }
 }
 </script>

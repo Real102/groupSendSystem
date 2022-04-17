@@ -78,20 +78,27 @@
         <el-table-column prop="err_reason" label="异常原因"></el-table-column>
         <el-table-column label="操作" width="120px">
           <template slot-scope="scope">
-            <el-select
-              v-model="scope.row.operate"
-              size="small"
-              @change="handleChageOperation(scope.row)"
-              placeholder="更多操作"
-              clearable
-            >
-              <el-option
-                v-for="item in handlerList"
-                :key="item.value"
-                :label="item.name"
-                :value="item.value"
-              ></el-option>
-            </el-select>
+            <el-dropdown>
+              <el-button type="success" size="mini">
+                更多操作<i class="el-icon-arrow-down el-icon--right"></i>
+              </el-button>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item @click.native="handleActiveChange(1, scope.row)"
+                  >查看内容</el-dropdown-item
+                >
+                <el-dropdown-item
+                  @click.native="handleActiveChange(2, scope.row)"
+                  :disabled="scope.row.status === 2"
+                  >退款</el-dropdown-item
+                >
+                <el-dropdown-item @click.native="handleActiveChange(3, scope.row)"
+                  >导出任务资料</el-dropdown-item
+                >
+                <el-dropdown-item @click.native="handleActiveChange(4, scope.row)"
+                  >上传任务报表</el-dropdown-item
+                >
+              </el-dropdown-menu>
+            </el-dropdown>
           </template>
         </el-table-column>
       </el-table>
@@ -145,40 +152,56 @@
         <el-button size="small" type="primary" @click="handleConfirm">确 定</el-button>
       </span>
     </el-dialog>
+
+    <el-dialog
+      title="上传任务报表"
+      :visible.sync="uploadDialogVisible"
+      :close-on-click-modal="false"
+      width="500px"
+    >
+      <el-form
+        :model="reportData"
+        class="reportForm"
+        ref="reportFormRef"
+        :rules="rule"
+        label-width="150px"
+      >
+        <Report ref="reportRef" :reportData="reportData"></Report>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="uploadDialogVisible = false">取 消</el-button>
+        <el-button size="small" type="primary" @click="handleSubmit">确定提交</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
 import { getTaskList } from '@/api/manager.js'
 import { parseTime } from '@/utils/index.js'
+import Report from './report.vue'
 export default {
   name: 'task',
+  components: {
+    Report
+  },
   data() {
     return {
       sendDialogTitle: '查看内容', // 弹框标题
       sendDialogVisible: false, // 弹框显隐状态
+      uploadDialogVisible: false, // 上传报表弹框显隐状态
       err_reason: '', // 当前弹框显示的异常内容
       sw: '',
       sendData: [],
+      reportData: {
+        filePath: '',
+        status: ''
+      },
       searchData: {
         taskName: 'taskname',
         taskValue: '',
         timeName: 'startTime',
         timeValue: ''
       },
-      handlerList: [
-        {
-          name: '查看内容',
-          value: 1
-        },
-        // {
-        //   name: '停止任务',
-        //   value: 2
-        // },
-        {
-          name: '更换渠道执行',
-          value: 3
-        }
-      ],
       taskSearchList: [
         {
           name: '任务名',
@@ -231,6 +254,10 @@ export default {
         sizes: [10, 30, 50, 100],
         pageSize: 10,
         total: 0
+      },
+      rule: {
+        filePath: [{ required: true, trigger: 'change', validator: this.filePathValid }],
+        status: [{ required: true, trigger: 'change', message: '请修改任务状态' }]
       }
     }
   },
@@ -275,28 +302,23 @@ export default {
         // TODO: 需要对数据格式进行处理
       }
     },
-    handleChageOperation(row) {
-      // 切换操作的时候触发事件
-      if (row.operate === 1) {
-        this.sendDialogVisible = true
-        this.sendDialogTitle = '查看内容'
-        this.err_reason = row.err_reason || '暂无内容'
-      } else if (row.operate === 3) {
-        // 增加个判断，避免每次点击按钮都请求接口
-        // if (this.swList.length <= 0) {
-        //   this.$store.dispatch('getSwList').then(() => {
-        //     this.sendDialogVisible = true
-        //     this.sendDialogTitle = '更换渠道'
-        //   })
-        // } else {
-        //   this.sendDialogVisible = true
-        //   this.sendDialogTitle = '更换渠道'
-        // }
-        // 目前只有一个渠道，暂时只弹框提示用户
-        this.$message.info('目前只有一个群发渠道，暂不支持更换！')
-      } else {
-        // 点击删除
-        console.log(row.id)
+    // 表单操作区域--更多操作
+    handleActiveChange(item, row) {
+      switch (item) {
+        case 1:
+          this.sendDialogVisible = true
+          this.sendDialogTitle = '查看内容'
+          this.err_reason = row.err_reason || '暂无内容'
+          break
+        case 2:
+          console.log('退款')
+          break
+        case 3:
+          console.log('导出任务资料')
+          break
+        case 4:
+          this.uploadDialogVisible = true
+          break
       }
     },
     initTaskList() {
@@ -339,6 +361,17 @@ export default {
         item.operate = ''
         this.sendData.push(item)
       })
+    },
+    handleSubmit() {
+      // 提交报表
+      this.$refs.reportFormRef.validate(valid => {
+        if (valid) {
+          console.log(this.reportData)
+        }
+      })
+    },
+    filePathValid(rule, value, cb) {
+      return cb()
     }
   }
 }
